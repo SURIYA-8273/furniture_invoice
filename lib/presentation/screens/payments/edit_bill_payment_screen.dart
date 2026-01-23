@@ -20,39 +20,28 @@ class EditBillPaymentScreen extends StatefulWidget {
 
 class _EditBillPaymentScreenState extends State<EditBillPaymentScreen> {
   late InvoiceEntity _currentInvoice;
-  String _newPaymentAmount = "0.00";
-  bool _isEnteringPayment = true;
+  late TextEditingController _paymentController;
 
   @override
   void initState() {
     super.initState();
     _currentInvoice = widget.invoice;
-  }
-
-  void _onKeypadTap(String value) {
-    setState(() {
-      if (value == "back") {
-        if (_newPaymentAmount.length > 1) {
-          _newPaymentAmount = _newPaymentAmount.substring(0, _newPaymentAmount.length - 1);
-        } else {
-          _newPaymentAmount = "0";
-        }
-      } else if (value == ".") {
-        if (!_newPaymentAmount.contains(".")) {
-          _newPaymentAmount += ".";
-        }
-      } else {
-        if (_newPaymentAmount == "0" || _newPaymentAmount == "0.00") {
-          _newPaymentAmount = value;
-        } else {
-          _newPaymentAmount += value;
-        }
-      }
+    _paymentController = TextEditingController(text: "0");
+    
+    // Load payment history for this invoice
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<PaymentHistoryProvider>().loadPayments(_currentInvoice.id);
     });
   }
 
+  @override
+  void dispose() {
+    _paymentController.dispose();
+    super.dispose();
+  }
+
   Future<void> _handleSave() async {
-    final double paymentAmount = double.tryParse(_newPaymentAmount) ?? 0.0;
+    final double paymentAmount = double.tryParse(_paymentController.text) ?? 0.0;
     
     if (paymentAmount <= 0 && paymentAmount == 0) {
       // If no new payment, maybe just updating bill items?
@@ -60,6 +49,9 @@ class _EditBillPaymentScreenState extends State<EditBillPaymentScreen> {
     }
 
     try {
+      final invoiceProvider = context.read<InvoiceProvider>();
+      final paymentProvider = context.read<PaymentHistoryProvider>();
+
       final updatedPaidAmount = _currentInvoice.paidAmount + paymentAmount;
       final updatedBalance = _currentInvoice.grandTotal - updatedPaidAmount;
       final updatedStatus = InvoiceEntity.determineStatus(_currentInvoice.grandTotal, updatedPaidAmount);
@@ -72,7 +64,7 @@ class _EditBillPaymentScreenState extends State<EditBillPaymentScreen> {
       );
 
       // 1. Update Invoice
-      await context.read<InvoiceProvider>().updateInvoice(updatedInvoice);
+      await invoiceProvider.updateInvoice(updatedInvoice);
 
       // 2. Add Payment Record if amount > 0
       if (paymentAmount > 0) {
@@ -87,7 +79,7 @@ class _EditBillPaymentScreenState extends State<EditBillPaymentScreen> {
           createdAt: DateTime.now(),
           notes: "Payment for Invoice #${_currentInvoice.invoiceNumber}",
         );
-        await context.read<PaymentHistoryProvider>().recordPayment(paymentRecord);
+        await paymentProvider.recordPayment(paymentRecord);
       }
 
       if (mounted) {
@@ -137,14 +129,13 @@ class _EditBillPaymentScreenState extends State<EditBillPaymentScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildItemsTable(),
-                  _buildActionButtons(),
+                  // Action buttons removed as per request
                   const Divider(height: 1),
                   _buildSummarySection(currencyFormat),
                 ],
               ),
             ),
           ),
-          _buildKeypadSection(currencyFormat),
           _buildFooterButton(),
         ],
       ),
@@ -161,7 +152,8 @@ class _EditBillPaymentScreenState extends State<EditBillPaymentScreen> {
           2: FlexColumnWidth(1.5),
           3: FlexColumnWidth(1),
           4: FlexColumnWidth(1.5),
-          5: FlexColumnWidth(2),
+          5: FlexColumnWidth(1.5),
+          6: FlexColumnWidth(2),
         },
         border: TableBorder(
           horizontalInside: BorderSide(color: Colors.grey[200]!),
@@ -176,29 +168,25 @@ class _EditBillPaymentScreenState extends State<EditBillPaymentScreen> {
   }
 
   TableRow _buildTableHeader() {
-    const headerStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 10, color: Colors.grey);
+    const headerStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 10, color: Colors.black);
     return const TableRow(
       children: [
-        TableCell(child: SizedBox(height: 40)),
+    
         TableCell(child: Center(child: Text('DESCRIPTION (H X W)', style: headerStyle))),
         TableCell(child: Center(child: Text('L', style: headerStyle))),
         TableCell(child: Center(child: Text('QTY', style: headerStyle))),
         TableCell(child: Center(child: Text('RATE', style: headerStyle))),
         TableCell(child: Center(child: Text('TOTAL L', style: headerStyle))),
+        TableCell(child: Center(child: Text('TOTAL', style: headerStyle))),
       ],
     );
   }
 
   TableRow _buildTableRow(InvoiceItemEntity item) {
-    const cellStyle = TextStyle(fontSize: 12);
+    const cellStyle = TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w500);
     return TableRow(
       children: [
-        TableCell(
-          child: SizedBox(
-            height: 40,
-            child: Icon(Icons.remove_circle, color: Colors.grey[300], size: 20),
-          ),
-        ),
+        
         TableCell(
           child: Container(
             height: 40,
@@ -219,63 +207,34 @@ class _EditBillPaymentScreenState extends State<EditBillPaymentScreen> {
         TableCell(
           child: Center(child: Text(item.totalQuantity.toStringAsFixed(1), style: cellStyle)),
         ),
+        TableCell(
+          child: Center(child: Text(item.totalAmount.toStringAsFixed(2), style: cellStyle)),
+        ),
       ],
     );
   }
 
-  Widget _buildActionButtons() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.architecture, size: 18),
-              label: const Text('ADD MEASUREMENT', style: TextStyle(fontSize: 11)),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.grey[600],
-                side: BorderSide(color: Colors.grey[300]!),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.construction, size: 18),
-              label: const Text('ADD SERVICE', style: TextStyle(fontSize: 11)),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.grey[600],
-                side: BorderSide(color: Colors.grey[300]!),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildSummarySection(NumberFormat currencyFormat) {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
-          _buildSummaryRow('GRAND TOTAL', currencyFormat.format(_currentInvoice.grandTotal), isBold: true, fontSize: 18),
-          const SizedBox(height: 12),
-          _buildSummaryRow('PREVIOUS PAID AMOUNT', currencyFormat.format(_currentInvoice.paidAmount), color: Colors.green, isBold: true, fontSize: 16),
-          const SizedBox(height: 20),
+          _buildSummaryRow('GRAND TOTAL', currencyFormat.format(_currentInvoice.grandTotal), isBold: true, fontSize: 18, color: Colors.black),
+          const SizedBox(height: 4),
+          _buildSummaryRow('PAID AMOUNT', currencyFormat.format(_currentInvoice.paidAmount), color: Colors.green[800], isBold: true, fontSize: 16),
+          const SizedBox(height: 4),
+                    _buildSummaryRow('REMAINING BALANCE', 
+            currencyFormat.format(_currentInvoice.balanceAmount - (double.tryParse(_paymentController.text) ?? 0)), 
+            color: Colors.red[400], isBold: true, fontSize: 16),
+             const SizedBox(height: 12),
           _buildPaymentHistory(),
           const SizedBox(height: 20),
           _buildNewPaymentInput(currencyFormat),
-          const SizedBox(height: 12),
-          _buildSummaryRow('REMAINING BALANCE', 
-            currencyFormat.format(_currentInvoice.balanceAmount - (double.tryParse(_newPaymentAmount) ?? 0)), 
-            color: Colors.red[400], isBold: true, fontSize: 16),
-          const SizedBox(height: 12),
-          _buildStatusChips(),
+         
+
+          
         ],
       ),
     );
@@ -286,8 +245,8 @@ class _EditBillPaymentScreenState extends State<EditBillPaymentScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label, style: TextStyle(
-          color: Colors.grey[600],
-          fontWeight: FontWeight.w600,
+          color: Colors.black87,
+          fontWeight: FontWeight.w700,
           fontSize: 12,
         )),
         Text(value, style: TextStyle(
@@ -318,19 +277,48 @@ class _EditBillPaymentScreenState extends State<EditBillPaymentScreen> {
             }
             // In a real app, we'd filter provider.payments by current invoice ID if available
             // For now, let's show the most recent payments for this customer
-            final payments = provider.payments.take(2).toList();
+            final payments = provider.payments.toList();
             if (payments.isEmpty) {
               return Text('No previous payments', style: TextStyle(color: Colors.grey[400], fontSize: 12));
             }
             return Column(
-              children: payments.map((p) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(DateFormat('MMM d, yyyy').format(p.paymentDate), style: TextStyle(color: Colors.grey[600], fontSize: 13)),
-                    Text('\$${p.paidAmount.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                  ],
+              children: payments.map((p) => Card(
+                margin: const EdgeInsets.only(bottom: 8),
+                elevation: 0,
+                color: Colors.grey[50],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  side: BorderSide(color: Colors.grey[200]!),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.payment, size: 16, color: Colors.grey),
+                          const SizedBox(width: 8),
+                          Text(
+                            DateFormat('dd MMM yyyy').format(p.paymentDate),
+                            style: const TextStyle(
+                              color: Colors.black87, 
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        '\$${p.paidAmount.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold, 
+                          fontSize: 14,
+                          color: Colors.black
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               )).toList(),
             );
@@ -343,7 +331,7 @@ class _EditBillPaymentScreenState extends State<EditBillPaymentScreen> {
   Widget _buildNewPaymentInput(NumberFormat currencyFormat) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 20),
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
       decoration: BoxDecoration(
         color: const Color(0xFFF3F9FF),
         borderRadius: BorderRadius.circular(12),
@@ -359,7 +347,22 @@ class _EditBillPaymentScreenState extends State<EditBillPaymentScreen> {
             children: [
               const Text('\$', style: TextStyle(color: ThemeTokens.primaryColor, fontSize: 24, fontWeight: FontWeight.bold)),
               const SizedBox(width: 8),
-              Text(_newPaymentAmount, style: const TextStyle(color: ThemeTokens.primaryColor, fontSize: 40, fontWeight: FontWeight.bold)),
+              Expanded(
+                child: TextField(
+                  controller: _paymentController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: ThemeTokens.primaryColor, fontSize: 40, fontWeight: FontWeight.bold),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  onChanged: (val) {
+                    setState(() {}); // Trigger rebuild to update Remaining Balance
+                  },
+                ),
+              ),
             ],
           ),
         ],
@@ -395,51 +398,7 @@ class _EditBillPaymentScreenState extends State<EditBillPaymentScreen> {
     );
   }
 
-  Widget _buildKeypadSection(NumberFormat currencyFormat) {
-    return Container(
-      color: const Color(0xFFF8F9FB),
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
-        children: [
-          _buildKeypadRow(['1', '2', '3']),
-          _buildKeypadRow(['4', '5', '6']),
-          _buildKeypadRow(['7', '8', '9']),
-          _buildKeypadRow(['.', '0', 'back']),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildKeypadRow(List<String> keys) {
-    return Row(
-      children: keys.map((key) => Expanded(child: _buildKeypadButton(key))).toList(),
-    );
-  }
-
-  Widget _buildKeypadButton(String key) {
-    Widget content;
-    if (key == 'back') {
-      content = const Icon(Icons.backspace_outlined, color: Colors.black, size: 20);
-    } else {
-      content = Text(key, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w500));
-    }
-
-    return InkWell(
-      onTap: () => _onKeypadTap(key),
-      child: Container(
-        height: 55,
-        margin: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 2, offset: const Offset(0, 1)),
-          ],
-        ),
-        child: Center(child: content),
-      ),
-    );
-  }
 
   Widget _buildFooterButton() {
     return Container(

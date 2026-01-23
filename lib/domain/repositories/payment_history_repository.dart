@@ -22,4 +22,7 @@ abstract class PaymentHistoryRepository {
     DateTime startDate,
     DateTime endDate,
   );
+
+  /// Get payments for a specific invoice
+  Future<List<PaymentHistoryEntity>> getPaymentsByInvoiceId(String invoiceId);
 }

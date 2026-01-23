@@ -84,15 +84,17 @@ class BillingCalculationProvider extends ChangeNotifier {
     InvoiceItemType type = InvoiceItemType.measurement,
     String? size,
     double mrp = 0.0,
-    int quantity = 1,
+    int quantity = 0,
     double? totalQuantity, // For direct items
+    double squareFeet = 0.0, // Length
   }) {
-    double finalSqFt = 0.0;
+    double finalSqFt = squareFeet;
     double finalTotalQty = 0.0;
 
     if (type == InvoiceItemType.measurement) {
-       finalSqFt = InvoiceItemEntity.calculateSquareFeetFromSize(size ?? '');
-       finalTotalQty = InvoiceItemEntity.calculateTotalQuantity(finalSqFt, quantity);
+        // Size string (HxW) is just informational now.
+        // finalSqFt is taken directly from arguments.
+        finalTotalQty = InvoiceItemEntity.calculateTotalQuantity(finalSqFt, quantity);
     } else {
        // Direct
        finalTotalQty = totalQuantity ?? 1.0;
@@ -139,10 +141,10 @@ class BillingCalculationProvider extends ChangeNotifier {
 
     final item = _items[index];
 
-    // If size changed, recalculate square feet (Only for measurement items)
-    if (item.type == InvoiceItemType.measurement && size != null && size != item.size) {
-      squareFeet = InvoiceItemEntity.calculateSquareFeetFromSize(size);
-    }
+    // If size changed, no longer recalculate squareFeet (Length) 
+    // if (item.type == InvoiceItemType.measurement && size != null && size != item.size) {
+    //   squareFeet = InvoiceItemEntity.calculateSquareFeetFromSize(size);
+    // }
 
     // Use provided values or keep existing
     final newSquareFeet = squareFeet ?? item.squareFeet;
@@ -153,8 +155,22 @@ class BillingCalculationProvider extends ChangeNotifier {
     double newTotalQuantity = totalQuantity ?? item.totalQuantity;
     
     // Auto-calc total quantity only if type is measurement AND totalQuantity wasn't explicitly passed
+    // Auto-calc total quantity only if type is measurement AND totalQuantity wasn't explicitly passed
     if (item.type == InvoiceItemType.measurement && totalQuantity == null) {
-       newTotalQuantity = InvoiceItemEntity.calculateTotalQuantity(newSquareFeet, newQuantity);
+       // If Length (squareFeet) is > 0, we are in Length Mode: Force sync.
+       if (newSquareFeet > 0.001) {
+          newTotalQuantity = InvoiceItemEntity.calculateTotalQuantity(newSquareFeet, newQuantity);
+       } else {
+          // Length is 0.
+          // If dimensions were explicitly changed, respect the formula (which gives 0).
+          // If dimensions were NOT changed (e.g. Rate update), preserve existing Total Length (Manual Mode).
+          bool dimensionsChanged = (squareFeet != null || quantity != null);
+          if (dimensionsChanged) {
+             newTotalQuantity = InvoiceItemEntity.calculateTotalQuantity(newSquareFeet, newQuantity);
+          } else {
+             newTotalQuantity = item.totalQuantity;
+          }
+       }
     } 
     // For direct/service items, totalQuantity is either passed or remains same.
     // If user passed a new quantity but not totalQuantity (weird case for direct), we might assume they mean totalQuantity?

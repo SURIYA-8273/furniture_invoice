@@ -31,19 +31,8 @@ class InvoiceItemEntity {
   });
 
   /// Calculate square feet from size string (e.g., "3×5" = 15)
+  /// Deprecated: Size no longer determines calculations
   static double calculateSquareFeetFromSize(String size) {
-    try {
-      final parts = size.toLowerCase().split('x');
-      if (parts.length == 2) {
-        final width = double.tryParse(parts[0].trim());
-        final height = double.tryParse(parts[1].trim());
-        if (width != null && height != null) {
-          return width * height;
-        }
-      }
-    } catch (e) {
-      // Return 0 if parsing fails
-    }
     return 0.0;
   }
 

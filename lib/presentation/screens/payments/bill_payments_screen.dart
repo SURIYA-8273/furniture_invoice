@@ -172,11 +172,13 @@ class _BillPaymentsScreenState extends State<BillPaymentsScreen> with SingleTick
                 label: 'NEW BILL',
                 color: theme.primaryColor,
                 isPrimary: true,
-                onTap: () {
-                  Navigator.push(
+                onTap: () async {
+                  final provider = context.read<InvoiceProvider>();
+                  await Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const BillingScreen()),
-                  ).then((_) => context.read<InvoiceProvider>().loadInvoices());
+                  );
+                  provider.loadInvoices();
                 },
               ),
               _buildBottomActionButton(
@@ -222,13 +224,15 @@ class _BillPaymentsScreenState extends State<BillPaymentsScreen> with SingleTick
         final invoice = invoices[index];
         return InvoiceListItem(
           invoice: invoice,
-          onTap: () {
-            Navigator.push(
+          onTap: () async {
+            final provider = context.read<InvoiceProvider>();
+            await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => EditBillPaymentScreen(invoice: invoice),
               ),
-            ).then((_) => context.read<InvoiceProvider>().loadInvoices());
+            );
+            provider.loadInvoices();
           },
         );
       },

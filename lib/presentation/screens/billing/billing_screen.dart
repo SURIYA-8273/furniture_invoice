@@ -7,6 +7,7 @@ import '../../../domain/entities/invoice_item_entity.dart';
 import '../../../domain/entities/invoice_entity.dart';
 import '../../providers/invoice_provider.dart';
 import '../invoices/invoice_preview_screen.dart';
+import 'bill_success_screen.dart';
 import 'package:uuid/uuid.dart';
 
 /// Enhanced Billing Screen: Single page invoice creation with payment details.
@@ -61,7 +62,7 @@ class _BillingScreenState extends State<BillingScreen> {
           productName: '',
           type: InvoiceItemType.measurement,
           mrp: 0.0,
-          quantity: 1,
+          quantity: 0,
         );
   }
 
@@ -80,208 +81,15 @@ class _BillingScreenState extends State<BillingScreen> {
       return;
     }
 
-    // Show Success Modal
-    _showSuccessModal(context, provider);
-  }
-
-  void _showSuccessModal(BuildContext context, BillingCalculationProvider provider) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    // Navigate to Success Screen
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const BillSuccessScreen(),
       ),
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-            left: 20,
-            right: 20,
-            top: 20,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // 1. Success Icon
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: Colors.green.shade50,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Container(
-                    width: 32,
-                    height: 32,
-                    decoration: const BoxDecoration(
-                      color: Colors.green,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.check, color: Colors.white, size: 20),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              
-              // 2. Title & Metadata
-              const Text(
-                'Bill Saved Successfully',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'BILL #${provider.invoiceNumber.split('-').last} • TODAY, ${TimeOfDay.now().format(context)}',
-                style: TextStyle(fontSize: 12, color: Colors.grey[500], fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 30),
-
-              const SizedBox(height: 24),
-
-              // 4. Bill Summary Card
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[50],
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade200),
-                ),
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('BILL SUMMARY', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey[500], letterSpacing: 1.0)),
-                        Text('Edit Items', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blue[700])),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                       children: [
-                         Text('Total Amount', style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.w600)),
-                         Text(CalculationUtils.formatCurrency(provider.grandTotal), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                       ],
-                     ),
-                    const SizedBox(height: 12),
-                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                       children: [
-                         Text('Advance Paid', style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.w600)),
-                         Text(CalculationUtils.formatCurrency(provider.advancePayment), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.green)),
-                       ],
-                     ),
-                     const SizedBox(height: 16),
-                     const Divider(height: 1),
-                     const SizedBox(height: 16),
-                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                       children: [
-                         Text('BALANCE DUE', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey[500])),
-                         Text(CalculationUtils.formatCurrency(provider.balanceDue), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 20, color: Colors.red)),
-                       ],
-                     ),
-                  ],
-                ),
-              ),
-              
-              const SizedBox(height: 30),
-
-              // 5. Actions
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () async {
-                        // Close the modal first
-                        Navigator.pop(context);
-                        
-                        // Construct Invoice Entity
-                        final invoice = InvoiceEntity(
-                          id: const Uuid().v4(),
-                          invoiceNumber: provider.invoiceNumber,
-                          items: List.from(provider.items),
-                          subtotal: provider.subtotal,
-                          discount: provider.discount,
-                          gst: provider.gstAmount,
-                          grandTotal: provider.grandTotal,
-                          paidAmount: provider.advancePayment,
-                          balanceAmount: provider.balanceDue,
-                          status: InvoiceEntity.determineStatus(provider.grandTotal, provider.advancePayment),
-                          invoiceDate: provider.invoiceDate,
-                          createdAt: DateTime.now(),
-                          updatedAt: DateTime.now(),
-                        );
-
-                        try {
-                           // Save to Repository
-                           await context.read<InvoiceProvider>().addInvoice(invoice);
-
-                            if (!context.mounted) return;
-
-                            // Navigate to Preview
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => InvoicePreviewScreen(
-                                  invoice: invoice,
-                                ),
-                              ),
-                            );
-                             
-                             ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Invoice Generated & Saved Successfully!')),
-                              );
-                              
-                             // Clear the form for next bill?
-                             // provider.clear(); // Optional: maybe do this after coming back or explicitly?
-                             // For now, let's keep it as is.
-                        } catch (e) {
-                            if (!context.mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Failed to save invoice: $e')),
-                            );
-                        }
-                      },
-                      icon: const Icon(Icons.description, size: 20),
-                      label: const Text('CONFIRM & GENERATE'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: IconButton(
-                       onPressed: () {},
-                       icon: const Icon(Icons.share_outlined),
-                       padding: const EdgeInsets.all(12),
-                       constraints: const BoxConstraints(),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: () {
-                   Navigator.pop(context);
-                }, 
-                child: Text('PRINT LATER', style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.0))
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
+
+
 
 
 
@@ -304,29 +112,7 @@ class _BillingScreenState extends State<BillingScreen> {
             tooltip: 'Add Measurement',
             onPressed: () => _addItem(),
           ),
-          IconButton(
-            icon: const Icon(Icons.shopping_bag, color: Colors.orange),
-            tooltip: 'Add Product',
-            onPressed: () => context.read<BillingCalculationProvider>().addItem(
-              productName: '',
-              type: InvoiceItemType.direct,
-              mrp: 0.0,
-              quantity: 1,
-            ),
-          ),
 
-          IconButton(
-            icon: const Icon(Icons.print, color: Colors.blue),
-            onPressed: () {
-               // Print functionality
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.more_horiz),
-            onPressed: () {
-              // More options
-            },
-          ),
         ],
       ),
       body: Form(
@@ -576,9 +362,9 @@ class _BillingScreenState extends State<BillingScreen> {
                 ),
               ),
             ),
-            _buildHeaderCell(theme, 'SQ.FT', flex: 1, showRightBorder: true),
+            _buildHeaderCell(theme, 'LENGTH', flex: 1, showRightBorder: true),
             _buildHeaderCell(theme, 'QTY', flex: 1, showRightBorder: true),
-            _buildHeaderCell(theme, 'TOT.QTY', flex: 1, showRightBorder: true),
+            _buildHeaderCell(theme, 'TOTAL LENGTH', flex: 1, showRightBorder: true),
             _buildHeaderCell(theme, 'RATE', flex: 1, showRightBorder: true),
             _buildHeaderCell(theme, 'TOTAL', flex: 2, align: TextAlign.right, showRightBorder: false),
           ],
@@ -692,9 +478,9 @@ class _EditableBillingRowState extends State<_EditableBillingRow> {
     _heightController = TextEditingController(text: sizeParts[1]);
     
     _sqFtController = TextEditingController(text: widget.item.squareFeet == 0 ? '' : widget.item.squareFeet.toStringAsFixed(2));
-    _qtyController = TextEditingController(text: widget.item.quantity.toString());
-    _totQtyController = TextEditingController(text: widget.item.totalQuantity.toStringAsFixed(2));
-    _rateController = TextEditingController(text: widget.item.mrp.toInt().toString());
+    _qtyController = TextEditingController(text: widget.item.quantity == 0 ? '' : widget.item.quantity.toString());
+    _totQtyController = TextEditingController(text: widget.item.totalQuantity == 0 ? '' : widget.item.totalQuantity.toStringAsFixed(2));
+    _rateController = TextEditingController(text: widget.item.mrp == 0 ? '' : widget.item.mrp.toInt().toString());
   }
 
   List<String> _parseSize(String size) {
@@ -742,8 +528,23 @@ class _EditableBillingRowState extends State<_EditableBillingRow> {
 
   void _updateNumericController(TextEditingController controller, double value) {
      final current = double.tryParse(controller.text) ?? 0.0;
+     // If value is 0 (or effective 0), text should be empty.
+     // Special case for quantity: if value is 1, text should be empty (default). 
+     // Wait, generic update might not know it's quantity. 
+     // But quantity is int, passed as double here.
+     // Actually, let's keep it simple: if value is 0, text is empty.
+     // For Quantity, if default is 1, we might need special handling or just accept 1 showing up if we don't clear it.
+     // But initialize handles start. Update handles changes. 
+     // If I intentionally set Qty to 1, should it clear? The user said "remove default value". 
+     // So if the value effectively matches the "empty" state, clear it.
+     
      if ((current - value).abs() > 0.001) {
-       controller.text = value % 1 == 0 ? value.toInt().toString() : value.toStringAsFixed(2);
+       // If value is 0, set to empty
+       if (value.abs() < 0.001) {
+         if (controller.text.isNotEmpty) controller.text = '';
+       } else {
+         controller.text = value % 1 == 0 ? value.toInt().toString() : value.toStringAsFixed(2);
+       }
      }
   }
 
@@ -844,6 +645,8 @@ class _EditableBillingRowState extends State<_EditableBillingRow> {
                 child: widget.item.type == InvoiceItemType.measurement 
                   ? _buildSmallTextField(
                       controller: _sqFtController, 
+                      hintText: '0',
+                      enabled: widget.item.totalQuantity <= 0.001 || widget.item.squareFeet > 0.001,
                       onChanged: (val) {
                          final v = double.tryParse(val);
                          if (v != null) widget.provider.updateItemField(widget.index, squareFeet: v);
@@ -860,6 +663,8 @@ class _EditableBillingRowState extends State<_EditableBillingRow> {
                 child: widget.item.type == InvoiceItemType.measurement
                   ? _buildSmallTextField(
                       controller: _qtyController, 
+                      hintText: '0',
+                      enabled: widget.item.totalQuantity <= 0.001 || widget.item.squareFeet > 0.001,
                       onChanged: (val) {
                          final v = int.tryParse(val);
                          if (v != null) widget.provider.updateItemField(widget.index, quantity: v);
@@ -875,6 +680,8 @@ class _EditableBillingRowState extends State<_EditableBillingRow> {
               child: _buildCellWithBorder(
                 child: _buildSmallTextField(
                   controller: _totQtyController, 
+                  hintText: '0',
+                  enabled: widget.item.squareFeet <= 0.001,
                   onChanged: (val) {
                      final v = double.tryParse(val);
                      if (v != null) widget.provider.updateItemField(widget.index, totalQuantity: v);
@@ -889,6 +696,7 @@ class _EditableBillingRowState extends State<_EditableBillingRow> {
               child: _buildCellWithBorder(
                  child: _buildSmallTextField(
                   controller: _rateController, 
+                  hintText: '0',
                   onChanged: (val) {
                      final v = double.tryParse(val);
                      if (v != null) widget.provider.updateItemField(widget.index, mrp: v);
@@ -930,18 +738,31 @@ class _EditableBillingRowState extends State<_EditableBillingRow> {
     );
   }
 
-  Widget _buildSmallTextField({required TextEditingController controller, required Function(String) onChanged}) {
+  Widget _buildSmallTextField({
+    required TextEditingController controller, 
+    required Function(String) onChanged,
+    bool enabled = true,
+    String? hintText,
+  }) {
     return TextField(
       controller: controller,
       textAlign: TextAlign.center,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      decoration: const InputDecoration(
+      maxLines: null, // Allow wrapping
+      decoration: InputDecoration(
         isDense: true,
         border: InputBorder.none,
-        contentPadding: EdgeInsets.symmetric(vertical: 12), // Match cell padding roughly
+        contentPadding: const EdgeInsets.symmetric(vertical: 12),
+        hintText: hintText,
+        hintStyle: TextStyle(color: Colors.grey[400]),
       ),
-      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+      style: TextStyle(
+        fontWeight: FontWeight.bold, 
+        fontSize: 13,
+        color: enabled ? Colors.black : Colors.grey,
+      ),
       onChanged: onChanged,
+      enabled: enabled,
     );
   }
   

@@ -3,7 +3,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../payments/bill_payments_screen.dart';
 import '../reports/reports_screen.dart';
 import '../settings/settings_screen.dart';
-import 'dashboard_tab.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,7 +16,6 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
-    const DashboardTab(),
     const BillPaymentsScreen(),
     const ReportsScreen(),
     const SettingsScreen(),
@@ -40,11 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedIndex: _selectedIndex,
         onDestinationSelected: _onItemTapped,
         destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.home_outlined),
-            selectedIcon: const Icon(Icons.home),
-            label: 'Home',
-          ),
+         
           NavigationDestination(
             icon: const Icon(Icons.receipt_long_outlined),
              selectedIcon: const Icon(Icons.receipt_long),

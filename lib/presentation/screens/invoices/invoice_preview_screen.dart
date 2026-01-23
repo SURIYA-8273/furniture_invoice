@@ -56,13 +56,17 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
       } else if (print) {
         // Implement print logic here if needed, or just open the file
         // For now, we rely on PDF viewer or OS to handle printing from the file
-         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('PDF Generated at ${file.path}')),
-          );
+         if (mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('PDF Generated at ${file.path}')),
+            );
+         }
       } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('PDF Generated at ${file.path}')),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('PDF Generated at ${file.path}')),
+            );
+          }
       }
 
     } catch (e) {
@@ -339,11 +343,12 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
           // Table Header
           Row(
             children: [
-              Expanded(flex: 4, child: _buildTableHeaderText('DESCRIPTION')),
-              Expanded(flex: 2, child: _buildTableHeaderText('L', align: TextAlign.center)),
+              Expanded(flex: 4, child: _buildTableHeaderText('DESCRIPTION')), // Name + Size
+              Expanded(flex: 1, child: _buildTableHeaderText('LENGTH', align: TextAlign.center)),
               Expanded(flex: 1, child: _buildTableHeaderText('QTY', align: TextAlign.center)),
-              Expanded(flex: 2, child: _buildTableHeaderText('RATE', align: TextAlign.right)),
-              Expanded(flex: 2, child: _buildTableHeaderText('AMOUNT', align: TextAlign.right)),
+              Expanded(flex: 1, child: _buildTableHeaderText('TOT.LEN', align: TextAlign.center)),
+              Expanded(flex: 1, child: _buildTableHeaderText('RATE', align: TextAlign.right)),
+              Expanded(flex: 2, child: _buildTableHeaderText('TOTAL', align: TextAlign.right)),
             ],
           ),
           const SizedBox(height: 12),
@@ -363,33 +368,51 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
                 children: [
                   Expanded(
                     flex: 4, 
-                    child: Text(
-                      item.productName,
-                      style: const TextStyle(fontWeight: FontWeight.w500),
-                    )
-                  ),
-                  Expanded(
-                    flex: 2, 
-                    child: Text(
-                      item.size,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey[600]),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.productName,
+                          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+                        ),
+                        if (item.size.isNotEmpty)
+                          Text(
+                            item.size,
+                            style: TextStyle(color: Colors.grey[600], fontSize: 11),
+                          ),
+                      ],
                     )
                   ),
                   Expanded(
                     flex: 1, 
                     child: Text(
-                      '${item.quantity}',
+                      item.squareFeet == 0 ? '-' : item.squareFeet.toStringAsFixed(2),
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontWeight: FontWeight.w500),
+                      style: TextStyle(color: Colors.grey[800], fontSize: 13),
                     )
                   ),
                   Expanded(
-                    flex: 2, 
+                    flex: 1, 
+                    child: Text(
+                      item.quantity == 0 ? '-' : '${item.quantity}',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey[800], fontSize: 13),
+                    )
+                  ),
+                  Expanded(
+                    flex: 1, 
+                    child: Text(
+                      item.totalQuantity == 0 ? '-' : item.totalQuantity.toStringAsFixed(2),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey[800], fontSize: 13),
+                    )
+                  ),
+                  Expanded(
+                    flex: 1, 
                     child: Text(
                       NumberFormat('#,##0').format(item.mrp),
                        textAlign: TextAlign.right,
-                       style: TextStyle(color: Colors.grey[600]),
+                       style: TextStyle(color: Colors.grey[600], fontSize: 13),
                     )
                   ),
                   Expanded(
@@ -397,7 +420,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
                     child: Text(
                        NumberFormat('#,##0').format(item.totalAmount),
                        textAlign: TextAlign.right,
-                       style: const TextStyle(fontWeight: FontWeight.bold),
+                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                     )
                   ),
                 ],

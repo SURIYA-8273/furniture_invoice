@@ -53,4 +53,18 @@ class PaymentHistoryRepositoryImpl implements PaymentHistoryRepository {
         .map((model) => model.toEntity())
         .toList();
   }
+
+  @override
+  Future<List<PaymentHistoryEntity>> getPaymentsByInvoiceId(String invoiceId) async {
+    final box = _getBox();
+    final allPayments = box.values.map((model) => model.toEntity()).toList();
+    
+    // Filter by invoiceId
+    final matchedPayments = allPayments.where((p) => p.invoiceId == invoiceId).toList();
+    
+    // Sort by date (newest first)
+    matchedPayments.sort((a, b) => b.paymentDate.compareTo(a.paymentDate));
+    
+    return matchedPayments;
+  }
 }

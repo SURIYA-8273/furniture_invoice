@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/theme_tokens.dart';
 import '../../../core/utils/calculation_utils.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../providers/invoice_provider.dart';
+import '../../../domain/entities/invoice_entity.dart';
 
 /// Reports Screen with comprehensive analytics
 class ReportsScreen extends StatefulWidget {
@@ -12,22 +15,18 @@ class ReportsScreen extends StatefulWidget {
   State<ReportsScreen> createState() => _ReportsScreenState();
 }
 
-class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _ReportsScreenState extends State<ReportsScreen> {
   DateTimeRange? _selectedDateRange;
   String _selectedPeriod = 'today'; // today, week, month, custom
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
     _setDateRangeForPeriod('today');
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+    // Ensure invoices are loaded
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<InvoiceProvider>().loadInvoices();
+    });
   }
 
   void _setDateRangeForPeriod(String period) {
@@ -81,33 +80,6 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.reports),
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          labelColor: theme.colorScheme.primary,
-          unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
-          indicatorColor: theme.colorScheme.primary,
-          indicatorWeight: 3,
-          indicatorSize: TabBarIndicatorSize.label,
-          labelStyle: theme.textTheme.titleSmall?.copyWith(
-            fontWeight: ThemeTokens.fontWeightBold,
-          ),
-          unselectedLabelStyle: theme.textTheme.titleSmall,
-          tabs: [
-            Tab(
-              icon: const Icon(Icons.trending_up),
-              text: l10n.totalSales,
-            ),
-            Tab(
-              icon: const Icon(Icons.history),
-              text: l10n.paymentHistory,
-            ),
-            Tab(
-              icon: const Icon(Icons.inventory),
-              text: l10n.productWiseSales,
-            ),
-          ],
-        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.file_download),
@@ -120,44 +92,124 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Date Range Filter
-          _buildDateRangeFilter(l10n, theme),
-          
-          // Tab Views
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
+      body: Consumer<InvoiceProvider>(
+        builder: (context, invoiceProvider, child) {
+          if (invoiceProvider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (invoiceProvider.error != null) {
+            return Center(child: Text(invoiceProvider.error!));
+          }
+
+          // Filter invoices based on date range
+          final filteredInvoices = _filterInvoices(invoiceProvider.invoices);
+
+          // Calculate summary metrics
+          final totalSales = filteredInvoices.fold(0.0, (sum, inv) => sum + inv.grandTotal);
+          final totalPending = filteredInvoices.fold(0.0, (sum, inv) => sum + inv.balanceAmount);
+          final totalDetails = filteredInvoices.length; // Total Bill count
+          final totalUnpaidBills = filteredInvoices.where((inv) => inv.hasPendingBalance).length;
+
+          return SingleChildScrollView(
+            padding: EdgeInsets.all(ThemeTokens.spacingMd),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSalesSummaryTab(l10n, theme),
-                _buildPaymentHistoryTab(l10n, theme),
-                _buildProductSalesTab(l10n, theme),
+                // Date Range Filter
+                _buildDateRangeFilter(l10n, theme),
+                SizedBox(height: ThemeTokens.spacingMd),
+
+                // Summary Grid
+                GridView.count(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: ThemeTokens.spacingMd,
+                  mainAxisSpacing: ThemeTokens.spacingMd,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  childAspectRatio: 1.5,
+                  children: [
+                    _buildSummaryCard(
+                      l10n.totalSales,
+                      CalculationUtils.formatCurrency(totalSales),
+                      Icons.trending_up,
+                      const Color(0xFF10B981),
+                      theme,
+                    ),
+                    _buildSummaryCard(
+                      l10n.totalPending,
+                      CalculationUtils.formatCurrency(totalPending),
+                      Icons.pending,
+                      const Color(0xFFEF4444), // Red for pending/alert
+                      theme,
+                    ),
+                    _buildSummaryCard(
+                      'Total Bill', // l10n.totalBills if available, else string
+                      totalDetails.toString(),
+                      Icons.receipt_long,
+                      const Color(0xFF6366F1),
+                      theme,
+                    ),
+                    _buildSummaryCard(
+                      'Total Unpaid Bills', // l10n.unpaidBills if available
+                      totalUnpaidBills.toString(),
+                      Icons.error_outline,
+                      const Color(0xFFF59E0B),
+                      theme,
+                    ),
+                  ],
+                ),
+                
+                // Recent Invoices Removed
               ],
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
+  }
+
+  List<InvoiceEntity> _filterInvoices(List<InvoiceEntity> invoices) {
+    if (_selectedDateRange == null) return invoices;
+    
+    return invoices.where((invoice) {
+      return invoice.invoiceDate.isAfter(_selectedDateRange!.start.subtract(const Duration(seconds: 1))) &&
+             invoice.invoiceDate.isBefore(_selectedDateRange!.end.add(const Duration(seconds: 1)));
+    }).toList();
   }
 
   Widget _buildDateRangeFilter(AppLocalizations l10n, ThemeData theme) {
     return Container(
       padding: EdgeInsets.all(ThemeTokens.spacingMd),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        border: Border(bottom: BorderSide(color: theme.colorScheme.outline)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(ThemeTokens.radiusMedium),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.dateRange,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: ThemeTokens.fontWeightBold,
-            ),
+          Row(
+            children: [
+              Icon(Icons.calendar_today, size: 16, color: theme.colorScheme.primary),
+              const SizedBox(width: 8),
+              Text(
+                l10n.dateRange.toUpperCase(),
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: Colors.grey[600],
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: ThemeTokens.spacingSm),
+          SizedBox(height: ThemeTokens.spacingMd),
           Wrap(
             spacing: ThemeTokens.spacingSm,
             runSpacing: ThemeTokens.spacingSm,
@@ -171,6 +223,19 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
                     : 'Custom'),
                 selected: _selectedPeriod == 'custom',
                 onSelected: (selected) => _selectCustomDateRange(),
+                backgroundColor: Colors.grey[100],
+                selectedColor: theme.colorScheme.primaryContainer,
+                checkmarkColor: theme.colorScheme.primary,
+                labelStyle: TextStyle(
+                  color: _selectedPeriod == 'custom' ? theme.colorScheme.primary : Colors.black87,
+                  fontWeight: _selectedPeriod == 'custom' ? FontWeight.bold : FontWeight.normal,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide(
+                    color: _selectedPeriod == 'custom' ? theme.colorScheme.primary.withOpacity(0.5) : Colors.transparent,
+                  ),
+                ),
               ),
             ],
           ),
@@ -180,87 +245,25 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
   }
 
   Widget _buildPeriodChip(String period, String label, ThemeData theme) {
+    final isSelected = _selectedPeriod == period;
     return FilterChip(
       label: Text(label),
-      selected: _selectedPeriod == period,
+      selected: isSelected,
       onSelected: (selected) {
         if (selected) _setDateRangeForPeriod(period);
       },
-    );
-  }
-
-  Widget _buildSalesSummaryTab(AppLocalizations l10n, ThemeData theme) {
-    // Mock data - replace with actual data from provider
-    final totalSales = 125000.0;
-    final totalPaid = 95000.0;
-    final totalPending = 30000.0;
-    final invoiceCount = 15;
-
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(ThemeTokens.spacingMd),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Summary Cards
-          Row(
-            children: [
-              Expanded(
-                child: _buildSummaryCard(
-                  l10n.totalSales,
-                  CalculationUtils.formatCurrency(totalSales),
-                  Icons.trending_up,
-                  const Color(0xFF10B981),
-                  theme,
-                ),
-              ),
-              SizedBox(width: ThemeTokens.spacingMd),
-              Expanded(
-                child: _buildSummaryCard(
-                  l10n.invoices,
-                  invoiceCount.toString(),
-                  Icons.receipt_long,
-                  const Color(0xFF6366F1),
-                  theme,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: ThemeTokens.spacingMd),
-          Row(
-            children: [
-              Expanded(
-                child: _buildSummaryCard(
-                  l10n.totalPaid,
-                  CalculationUtils.formatCurrency(totalPaid),
-                  Icons.check_circle,
-                  const Color(0xFF3B82F6),
-                  theme,
-                ),
-              ),
-              SizedBox(width: ThemeTokens.spacingMd),
-              Expanded(
-                child: _buildSummaryCard(
-                  l10n.totalPending,
-                  CalculationUtils.formatCurrency(totalPending),
-                  Icons.pending,
-                  const Color(0xFFF59E0B),
-                  theme,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: ThemeTokens.spacingLg),
-          
-          // Recent Invoices
-          Text(
-            'Recent Invoices',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: ThemeTokens.fontWeightBold,
-            ),
-          ),
-          SizedBox(height: ThemeTokens.spacingMd),
-          _buildRecentInvoicesList(l10n, theme),
-        ],
+      backgroundColor: Colors.grey[100],
+      selectedColor: theme.colorScheme.primaryContainer,
+      checkmarkColor: theme.colorScheme.primary,
+      labelStyle: TextStyle(
+        color: isSelected ? theme.colorScheme.primary : Colors.black87,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: isSelected ? theme.colorScheme.primary.withOpacity(0.5) : Colors.transparent,
+        ),
       ),
     );
   }
@@ -269,224 +272,63 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
     return Container(
       padding: EdgeInsets.all(ThemeTokens.spacingMd),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [color, color.withValues(alpha: 0.8)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(ThemeTokens.radiusMedium),
         boxShadow: [
           BoxShadow(
-            color: color.withValues(alpha: 0.3),
+            color: color.withOpacity(0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
         ],
+        border: Border.all(color: color.withOpacity(0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Icon(icon, color: Colors.white, size: 32),
-          SizedBox(height: ThemeTokens.spacingSm),
-          Text(
-            title,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: Colors.white.withValues(alpha: 0.9),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              shape: BoxShape.circle,
             ),
+            child: Icon(icon, color: color, size: 20),
           ),
-          SizedBox(height: ThemeTokens.spacingXs),
-          Text(
-            value,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              color: Colors.white,
-              fontWeight: ThemeTokens.fontWeightBold,
-            ),
+          Column(
+             crossAxisAlignment: CrossAxisAlignment.start,
+             mainAxisSize: MainAxisSize.min,
+             children: [
+               FittedBox(
+                 fit: BoxFit.scaleDown,
+                 alignment: Alignment.centerLeft,
+                 child: Text(
+                   value,
+                   style: theme.textTheme.headlineSmall?.copyWith(
+                     fontWeight: ThemeTokens.fontWeightBold,
+                     color: theme.colorScheme.onSurface,
+                     fontSize: 22,
+                   ),
+                 ),
+               ),
+               const SizedBox(height: 4),
+               Text(
+                 title,
+                 style: theme.textTheme.bodyMedium?.copyWith(
+                   color: theme.colorScheme.onSurfaceVariant,
+                   fontSize: 12,
+                 ),
+                 maxLines: 2,
+                 overflow: TextOverflow.ellipsis,
+               ),
+             ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildRecentInvoicesList(AppLocalizations l10n, ThemeData theme) {
-    // Mock data - replace with actual data
-    final invoices = [
-      {'number': 'INV-001', 'amount': 15000.0, 'status': 'paid'},
-      {'number': 'INV-002', 'amount': 25000.0, 'status': 'pending'},
-      {'number': 'INV-003', 'amount': 18000.0, 'status': 'partially_paid'},
-    ];
 
-    return Card(
-      child: ListView.separated(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: invoices.length,
-        separatorBuilder: (context, index) => const Divider(height: 1),
-        itemBuilder: (context, index) {
-          final invoice = invoices[index];
-          return ListTile(
-            leading: CircleAvatar(
-              backgroundColor: _getStatusColor(invoice['status'] as String).withValues(alpha: 0.2),
-              child: Icon(
-                Icons.receipt,
-                color: _getStatusColor(invoice['status'] as String),
-              ),
-            ),
-            title: Text(invoice['number'] as String),
-            trailing: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  CalculationUtils.formatCurrency(invoice['amount'] as double),
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: ThemeTokens.fontWeightBold,
-                  ),
-                ),
-                Text(
-                  _getStatusLabel(invoice['status'] as String, l10n),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: _getStatusColor(invoice['status'] as String),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
 
-  // Removed _buildCustomerDuesTab
 
-  Widget _buildPaymentHistoryTab(AppLocalizations l10n, ThemeData theme) {
-    // Mock data - replace with actual data
-    final payments = [
-      {
-        'date': DateTime.now().subtract(const Duration(days: 1)),
-        'amount': 5000.0,
-        'mode': 'cash',
-      },
-      {
-        'date': DateTime.now().subtract(const Duration(days: 2)),
-        'amount': 15000.0,
-        'mode': 'upi',
-      },
-      {
-        'date': DateTime.now().subtract(const Duration(days: 3)),
-        'amount': 10000.0,
-        'mode': 'card',
-      },
-    ];
-
-    return ListView.builder(
-      padding: EdgeInsets.all(ThemeTokens.spacingMd),
-      itemCount: payments.length,
-      itemBuilder: (context, index) {
-        final payment = payments[index];
-        return Card(
-          margin: EdgeInsets.only(bottom: ThemeTokens.spacingMd),
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: const Color(0xFF10B981).withValues(alpha: 0.2),
-              child: const Icon(
-                Icons.payment,
-                color: Color(0xFF10B981),
-              ),
-            ),
-            title: Text('Payment #${index + 1}'),
-            subtitle: Text(
-              '${DateFormat('dd MMM yyyy, hh:mm a').format(payment['date'] as DateTime)} • ${_getPaymentModeLabel(payment['mode'] as String, l10n)}',
-            ),
-            trailing: Text(
-              CalculationUtils.formatCurrency(payment['amount'] as double),
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: const Color(0xFF10B981),
-                fontWeight: ThemeTokens.fontWeightBold,
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildProductSalesTab(AppLocalizations l10n, ThemeData theme) {
-    // Mock data - replace with actual data
-    final products = [
-      {'name': 'Sofa 3×5', 'quantity': 12, 'sales': 45000.0},
-      {'name': 'Dining Table 4×6', 'quantity': 8, 'sales': 32000.0},
-      {'name': 'Bed 5×7', 'quantity': 6, 'sales': 28000.0},
-    ];
-
-    return ListView.builder(
-      padding: EdgeInsets.all(ThemeTokens.spacingMd),
-      itemCount: products.length,
-      itemBuilder: (context, index) {
-        final product = products[index];
-        return Card(
-          margin: EdgeInsets.only(bottom: ThemeTokens.spacingMd),
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: theme.colorScheme.secondaryContainer,
-              child: Icon(
-                Icons.inventory,
-                color: theme.colorScheme.onSecondaryContainer,
-              ),
-            ),
-            title: Text(product['name'] as String),
-            subtitle: Text('${l10n.quantity}: ${product['quantity']}'),
-            trailing: Text(
-              CalculationUtils.formatCurrency(product['sales'] as double),
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: ThemeTokens.fontWeightBold,
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'paid':
-        return const Color(0xFF10B981);
-      case 'pending':
-        return const Color(0xFFEF4444);
-      case 'partially_paid':
-        return const Color(0xFFF59E0B);
-      default:
-        return Colors.grey;
-    }
-  }
-
-  String _getStatusLabel(String status, AppLocalizations l10n) {
-    switch (status) {
-      case 'paid':
-        return l10n.paid;
-      case 'pending':
-        return l10n.unpaid;
-      case 'partially_paid':
-        return l10n.partiallyPaid;
-      default:
-        return status;
-    }
-  }
-
-  String _getPaymentModeLabel(String mode, AppLocalizations l10n) {
-    switch (mode) {
-      case 'cash':
-        return l10n.cash;
-      case 'card':
-        return l10n.card;
-      case 'upi':
-        return l10n.upi;
-      case 'bank_transfer':
-        return l10n.bankTransfer;
-      case 'cheque':
-        return l10n.cheque;
-      default:
-        return mode;
-    }
-  }
 }

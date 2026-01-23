@@ -109,28 +109,44 @@ class PdfService {
   pw.Widget _buildItemsTable(InvoiceEntity invoice) {
     return pw.Table(
       border: pw.TableBorder.all(),
+      columnWidths: {
+        0: const pw.FlexColumnWidth(4), // Description
+        1: const pw.FlexColumnWidth(1), // Length
+        2: const pw.FlexColumnWidth(1), // Qty
+        3: const pw.FlexColumnWidth(1), // Total Length
+        4: const pw.FlexColumnWidth(1), // Rate
+        5: const pw.FlexColumnWidth(2), // Total
+      },
       children: [
         // Header
         pw.TableRow(
           decoration: pw.BoxDecoration(color: PdfColors.grey300),
           children: [
-            _buildTableCell('Product', isHeader: true),
-            _buildTableCell('Size', isHeader: true),
-            _buildTableCell('Sq.Ft', isHeader: true),
-            _buildTableCell('Qty', isHeader: true),
-            _buildTableCell('Total Qty', isHeader: true),
-            _buildTableCell('MRP', isHeader: true),
-            _buildTableCell('Amount', isHeader: true),
+            _buildTableCell('DESCRIPTION', isHeader: true),
+            _buildTableCell('LENGTH', isHeader: true),
+            _buildTableCell('QTY', isHeader: true),
+            _buildTableCell('TOT.LEN', isHeader: true),
+            _buildTableCell('RATE', isHeader: true),
+            _buildTableCell('TOTAL', isHeader: true),
           ],
         ),
         // Items
         ...invoice.items.map((item) => pw.TableRow(
               children: [
-                _buildTableCell(item.productName),
-                _buildTableCell(item.size),
-                _buildTableCell(item.squareFeet.toStringAsFixed(2)),
-                _buildTableCell(item.quantity.toString()),
-                _buildTableCell(item.totalQuantity.toStringAsFixed(2)),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(5),
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(item.productName, style: const pw.TextStyle(fontSize: 9)),
+                      if (item.size.isNotEmpty)
+                        pw.Text(item.size, style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700)),
+                    ],
+                  ),
+                ),
+                _buildTableCell(item.squareFeet == 0 ? '-' : item.squareFeet.toStringAsFixed(2)),
+                _buildTableCell(item.quantity == 0 ? '-' : item.quantity.toString()),
+                _buildTableCell(item.totalQuantity == 0 ? '-' : item.totalQuantity.toStringAsFixed(2)),
                 _buildTableCell('₹${item.mrp.toStringAsFixed(2)}'),
                 _buildTableCell('₹${item.totalAmount.toStringAsFixed(2)}'),
               ],

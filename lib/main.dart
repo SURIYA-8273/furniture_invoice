@@ -21,6 +21,7 @@ import 'domain/usecases/product/update_product.dart';
 import 'domain/usecases/product/delete_product.dart';
 import 'domain/usecases/product/get_products_by_category.dart';
 import 'domain/usecases/payment_history/add_payment.dart';
+import 'domain/usecases/payment_history/get_invoice_payments.dart';
 import 'data/repositories/payment_history_repository_impl.dart';
 import 'presentation/providers/payment_history_provider.dart';
 import 'presentation/providers/invoice_provider.dart';
@@ -69,6 +70,7 @@ void main() async {
     addPaymentUseCase: AddPayment(
       paymentRepository: paymentHistoryRepository,
     ),
+    getInvoicePaymentsUseCase: GetInvoicePayments(paymentHistoryRepository),
   );
   
   // Initialize invoice dependencies
