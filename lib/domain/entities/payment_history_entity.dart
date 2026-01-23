@@ -2,7 +2,7 @@
 /// Represents a single payment transaction made by a customer
 class PaymentHistoryEntity {
   final String id;
-  final String customerId;
+  final String? invoiceId;
   final DateTime paymentDate;
   final double paidAmount;
   final String paymentMode; // Cash, UPI, Bank Transfer, Card
@@ -13,7 +13,7 @@ class PaymentHistoryEntity {
 
   PaymentHistoryEntity({
     required this.id,
-    required this.customerId,
+    this.invoiceId,
     required this.paymentDate,
     required this.paidAmount,
     required this.paymentMode,
@@ -38,7 +38,7 @@ class PaymentHistoryEntity {
   /// Create a copy with updated fields
   PaymentHistoryEntity copyWith({
     String? id,
-    String? customerId,
+    String? invoiceId,
     DateTime? paymentDate,
     double? paidAmount,
     String? paymentMode,
@@ -49,7 +49,7 @@ class PaymentHistoryEntity {
   }) {
     return PaymentHistoryEntity(
       id: id ?? this.id,
-      customerId: customerId ?? this.customerId,
+      invoiceId: invoiceId ?? this.invoiceId,
       paymentDate: paymentDate ?? this.paymentDate,
       paidAmount: paidAmount ?? this.paidAmount,
       paymentMode: paymentMode ?? this.paymentMode,
@@ -62,7 +62,7 @@ class PaymentHistoryEntity {
 
   @override
   String toString() {
-    return 'PaymentHistoryEntity(id: $id, customerId: $customerId, paidAmount: $paidAmount, remainingDue: $remainingDue)';
+    return 'PaymentHistoryEntity(id: $id, invoiceId: $invoiceId, paidAmount: $paidAmount, remainingDue: $remainingDue)';
   }
 
   @override
@@ -71,7 +71,7 @@ class PaymentHistoryEntity {
 
     return other is PaymentHistoryEntity &&
         other.id == id &&
-        other.customerId == customerId &&
+        other.invoiceId == invoiceId &&
         other.paymentDate == paymentDate &&
         other.paidAmount == paidAmount &&
         other.paymentMode == paymentMode &&
@@ -83,7 +83,7 @@ class PaymentHistoryEntity {
   @override
   int get hashCode {
     return id.hashCode ^
-        customerId.hashCode ^
+        invoiceId.hashCode ^
         paymentDate.hashCode ^
         paidAmount.hashCode ^
         paymentMode.hashCode ^

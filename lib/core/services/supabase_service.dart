@@ -42,21 +42,6 @@ class SupabaseService {
     return _client!;
   }
 
-  /// Sync customers to cloud
-  Future<void> syncCustomers(List<Map<String, dynamic>> customers) async {
-    try {
-      for (final customer in customers) {
-        await client
-            .from('customers')
-            .upsert(customer, onConflict: 'id');
-      }
-      debugPrint('Synced ${customers.length} customers to cloud');
-    } catch (e) {
-      debugPrint('Error syncing customers: $e');
-      rethrow;
-    }
-  }
-
   /// Sync invoices to cloud
   Future<void> syncInvoices(List<Map<String, dynamic>> invoices) async {
     try {
@@ -83,21 +68,6 @@ class SupabaseService {
       debugPrint('Synced ${payments.length} payments to cloud');
     } catch (e) {
       debugPrint('Error syncing payments: $e');
-      rethrow;
-    }
-  }
-
-  /// Fetch customers from cloud
-  Future<List<Map<String, dynamic>>> fetchCustomers() async {
-    try {
-      final response = await client
-          .from('customers')
-          .select()
-          .order('created_at', ascending: false);
-      
-      return List<Map<String, dynamic>>.from(response);
-    } catch (e) {
-      debugPrint('Error fetching customers: $e');
       rethrow;
     }
   }
@@ -129,12 +99,10 @@ class SupabaseService {
 
   /// Perform full sync (upload local data to cloud)
   Future<void> performFullSync({
-    required List<Map<String, dynamic>> customers,
     required List<Map<String, dynamic>> invoices,
     required List<Map<String, dynamic>> payments,
   }) async {
     try {
-      await syncCustomers(customers);
       await syncInvoices(invoices);
       await syncPayments(payments);
       debugPrint('Full sync completed successfully');

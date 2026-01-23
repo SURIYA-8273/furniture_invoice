@@ -14,8 +14,6 @@ class PdfService {
   Future<File> generateInvoicePdf({
     required InvoiceEntity invoice,
     required BusinessProfileEntity businessProfile,
-    required String customerAddress,
-    required String customerPhone,
   }) async {
     final pdf = pw.Document();
 
@@ -33,7 +31,7 @@ class PdfService {
               pw.SizedBox(height: 20),
 
               // Invoice Details
-              _buildInvoiceDetails(invoice, customerAddress, customerPhone),
+              _buildInvoiceDetails(invoice),
               pw.SizedBox(height: 20),
 
               // Items Table
@@ -84,7 +82,7 @@ class PdfService {
     );
   }
 
-  pw.Widget _buildInvoiceDetails(InvoiceEntity invoice, String address, String phone) {
+  pw.Widget _buildInvoiceDetails(InvoiceEntity invoice) {
     return pw.Row(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -92,18 +90,14 @@ class PdfService {
         pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
-            pw.Text('Bill To:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+            pw.Text('Bill Details:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
             pw.SizedBox(height: 5),
-            pw.Text(invoice.customerName, style: pw.TextStyle(fontSize: 16)),
-            pw.Text(address),
-            pw.Text('Phone: $phone'),
+            pw.Text('Invoice: ${invoice.invoiceNumber}', style: pw.TextStyle(fontSize: 14)),
           ],
         ),
         pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.end,
           children: [
-            pw.Text('Invoice: ${invoice.invoiceNumber}', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-            pw.SizedBox(height: 5),
             pw.Text('Date: ${_formatDate(invoice.invoiceDate)}'),
             pw.Text('Status: ${invoice.status.toUpperCase()}'),
           ],

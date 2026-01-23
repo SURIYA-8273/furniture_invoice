@@ -10,7 +10,7 @@ class PaymentHistoryModel extends HiveObject {
   String id;
 
   @HiveField(1)
-  String customerId;
+  String? invoiceId;
 
   @HiveField(2)
   DateTime paymentDate;
@@ -35,7 +35,7 @@ class PaymentHistoryModel extends HiveObject {
 
   PaymentHistoryModel({
     required this.id,
-    required this.customerId,
+    this.invoiceId,
     required this.paymentDate,
     required this.paidAmount,
     required this.paymentMode,
@@ -49,7 +49,7 @@ class PaymentHistoryModel extends HiveObject {
   PaymentHistoryEntity toEntity() {
     return PaymentHistoryEntity(
       id: id,
-      customerId: customerId,
+      invoiceId: invoiceId,
       paymentDate: paymentDate,
       paidAmount: paidAmount,
       paymentMode: paymentMode,
@@ -64,7 +64,7 @@ class PaymentHistoryModel extends HiveObject {
   factory PaymentHistoryModel.fromEntity(PaymentHistoryEntity entity) {
     return PaymentHistoryModel(
       id: entity.id,
-      customerId: entity.customerId,
+      invoiceId: entity.invoiceId,
       paymentDate: entity.paymentDate,
       paidAmount: entity.paidAmount,
       paymentMode: entity.paymentMode,
@@ -79,11 +79,10 @@ class PaymentHistoryModel extends HiveObject {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'customerId': customerId,
+      'invoiceId': invoiceId,
       'paymentDate': paymentDate.toIso8601String(),
       'paidAmount': paidAmount,
       'paymentMode': paymentMode,
-      'previousDue': previousDue,
       'remainingDue': remainingDue,
       'notes': notes,
       'createdAt': createdAt.toIso8601String(),
@@ -94,11 +93,11 @@ class PaymentHistoryModel extends HiveObject {
   factory PaymentHistoryModel.fromJson(Map<String, dynamic> json) {
     return PaymentHistoryModel(
       id: json['id'] as String,
-      customerId: json['customerId'] as String,
+      invoiceId: json['invoiceId'] as String?,
       paymentDate: DateTime.parse(json['paymentDate'] as String),
       paidAmount: (json['paidAmount'] as num).toDouble(),
       paymentMode: json['paymentMode'] as String,
-      previousDue: (json['previousDue'] as num).toDouble(),
+      previousDue: 0.0, // Default or adjust if needed
       remainingDue: (json['remainingDue'] as num).toDouble(),
       notes: json['notes'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),

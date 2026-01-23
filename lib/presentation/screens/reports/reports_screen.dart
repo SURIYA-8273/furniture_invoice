@@ -20,7 +20,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _setDateRangeForPeriod('today');
   }
 
@@ -99,10 +99,6 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
               text: l10n.totalSales,
             ),
             Tab(
-              icon: const Icon(Icons.assignment_ind),
-              text: l10n.customerWiseDue,
-            ),
-            Tab(
               icon: const Icon(Icons.history),
               text: l10n.paymentHistory,
             ),
@@ -135,7 +131,6 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
               controller: _tabController,
               children: [
                 _buildSalesSummaryTab(l10n, theme),
-                _buildCustomerDuesTab(l10n, theme),
                 _buildPaymentHistoryTab(l10n, theme),
                 _buildProductSalesTab(l10n, theme),
               ],
@@ -315,9 +310,9 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
   Widget _buildRecentInvoicesList(AppLocalizations l10n, ThemeData theme) {
     // Mock data - replace with actual data
     final invoices = [
-      {'number': 'INV-001', 'customer': 'John Doe', 'amount': 15000.0, 'status': 'paid'},
-      {'number': 'INV-002', 'customer': 'Jane Smith', 'amount': 25000.0, 'status': 'pending'},
-      {'number': 'INV-003', 'customer': 'Bob Johnson', 'amount': 18000.0, 'status': 'partially_paid'},
+      {'number': 'INV-001', 'amount': 15000.0, 'status': 'paid'},
+      {'number': 'INV-002', 'amount': 25000.0, 'status': 'pending'},
+      {'number': 'INV-003', 'amount': 18000.0, 'status': 'partially_paid'},
     ];
 
     return Card(
@@ -337,7 +332,6 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
               ),
             ),
             title: Text(invoice['number'] as String),
-            subtitle: Text(invoice['customer'] as String),
             trailing: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -362,100 +356,23 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
     );
   }
 
-  Widget _buildCustomerDuesTab(AppLocalizations l10n, ThemeData theme) {
-    // Mock data - replace with actual data
-    final customers = [
-      {'name': 'John Doe', 'phone': '9876543210', 'due': 15000.0},
-      {'name': 'Jane Smith', 'phone': '9876543211', 'due': 25000.0},
-      {'name': 'Bob Johnson', 'phone': '9876543212', 'due': 8000.0},
-    ];
-
-    final totalDues = customers.fold<double>(0, (sum, c) => sum + (c['due'] as double));
-
-    return Column(
-      children: [
-        Container(
-          margin: EdgeInsets.all(ThemeTokens.spacingMd),
-          padding: EdgeInsets.all(ThemeTokens.spacingMd),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFFEF4444), Color(0xFFDC2626)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(ThemeTokens.radiusMedium),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                l10n.totalPending,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: Colors.white,
-                ),
-              ),
-              Text(
-                CalculationUtils.formatCurrency(totalDues),
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  color: Colors.white,
-                  fontWeight: ThemeTokens.fontWeightBold,
-                ),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            padding: EdgeInsets.symmetric(horizontal: ThemeTokens.spacingMd),
-            itemCount: customers.length,
-            itemBuilder: (context, index) {
-              final customer = customers[index];
-              return Card(
-                margin: EdgeInsets.only(bottom: ThemeTokens.spacingMd),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: theme.colorScheme.primaryContainer,
-                    child: Icon(
-                      Icons.person,
-                      color: theme.colorScheme.onPrimaryContainer,
-                    ),
-                  ),
-                  title: Text(customer['name'] as String),
-                  subtitle: Text(customer['phone'] as String),
-                  trailing: Text(
-                    CalculationUtils.formatCurrency(customer['due'] as double),
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: const Color(0xFFEF4444),
-                      fontWeight: ThemeTokens.fontWeightBold,
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
+  // Removed _buildCustomerDuesTab
 
   Widget _buildPaymentHistoryTab(AppLocalizations l10n, ThemeData theme) {
     // Mock data - replace with actual data
     final payments = [
       {
         'date': DateTime.now().subtract(const Duration(days: 1)),
-        'customer': 'John Doe',
         'amount': 5000.0,
         'mode': 'cash',
       },
       {
         'date': DateTime.now().subtract(const Duration(days: 2)),
-        'customer': 'Jane Smith',
         'amount': 15000.0,
         'mode': 'upi',
       },
       {
         'date': DateTime.now().subtract(const Duration(days: 3)),
-        'customer': 'Bob Johnson',
         'amount': 10000.0,
         'mode': 'card',
       },
@@ -476,7 +393,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
                 color: Color(0xFF10B981),
               ),
             ),
-            title: Text(payment['customer'] as String),
+            title: Text('Payment #${index + 1}'),
             subtitle: Text(
               '${DateFormat('dd MMM yyyy, hh:mm a').format(payment['date'] as DateTime)} • ${_getPaymentModeLabel(payment['mode'] as String, l10n)}',
             ),

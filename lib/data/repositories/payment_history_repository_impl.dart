@@ -17,19 +17,6 @@ class PaymentHistoryRepositoryImpl implements PaymentHistoryRepository {
   }
 
   @override
-  Future<List<PaymentHistoryEntity>> getCustomerPayments(String customerId) async {
-    final box = _getBox();
-    final payments = box.values
-        .where((payment) => payment.customerId == customerId)
-        .map((model) => model.toEntity())
-        .toList();
-    
-    // Sort by date descending (newest first)
-    payments.sort((a, b) => b.paymentDate.compareTo(a.paymentDate));
-    return payments;
-  }
-
-  @override
   Future<PaymentHistoryEntity?> getPaymentById(String paymentId) async {
     final box = _getBox();
     final model = box.get(paymentId);

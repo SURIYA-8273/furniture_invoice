@@ -13,49 +13,41 @@ class InvoiceModel extends HiveObject {
   final String invoiceNumber;
 
   @HiveField(2)
-  final String customerId;
-
-  @HiveField(3)
-  final String customerName;
-
-  @HiveField(4)
   final List<InvoiceItemModel> items;
 
-  @HiveField(5)
+  @HiveField(3)
   final double subtotal;
 
-  @HiveField(6)
+  @HiveField(4)
   final double discount;
 
-  @HiveField(7)
+  @HiveField(5)
   final double gst;
 
-  @HiveField(8)
+  @HiveField(6)
   final double grandTotal;
 
-  @HiveField(9)
+  @HiveField(7)
   final double paidAmount;
 
-  @HiveField(10)
+  @HiveField(8)
   final double balanceAmount;
 
-  @HiveField(11)
+  @HiveField(9)
   final String status;
 
-  @HiveField(12)
+  @HiveField(10)
   final DateTime invoiceDate;
 
-  @HiveField(13)
+  @HiveField(11)
   final DateTime createdAt;
 
-  @HiveField(14)
+  @HiveField(12)
   final DateTime updatedAt;
 
   InvoiceModel({
     required this.id,
     required this.invoiceNumber,
-    required this.customerId,
-    required this.customerName,
     required this.items,
     required this.subtotal,
     this.discount = 0.0,
@@ -73,8 +65,6 @@ class InvoiceModel extends HiveObject {
     return InvoiceModel(
       id: entity.id,
       invoiceNumber: entity.invoiceNumber,
-      customerId: entity.customerId,
-      customerName: entity.customerName,
       items: entity.items.map((e) => InvoiceItemModel.fromEntity(e)).toList(),
       subtotal: entity.subtotal,
       discount: entity.discount,
@@ -93,8 +83,6 @@ class InvoiceModel extends HiveObject {
     return InvoiceEntity(
       id: id,
       invoiceNumber: invoiceNumber,
-      customerId: customerId,
-      customerName: customerName,
       items: items.map((e) => e.toEntity()).toList(),
       subtotal: subtotal,
       discount: discount,
@@ -113,8 +101,6 @@ class InvoiceModel extends HiveObject {
     return {
       'id': id,
       'invoiceNumber': invoiceNumber,
-      'customerId': customerId,
-      'customerName': customerName,
       'items': items.map((e) => e.toJson()).toList(),
       'subtotal': subtotal,
       'discount': discount,
@@ -133,8 +119,6 @@ class InvoiceModel extends HiveObject {
     return InvoiceModel(
       id: json['id'] as String,
       invoiceNumber: json['invoiceNumber'] as String,
-      customerId: json['customerId'] as String,
-      customerName: json['customerName'] as String,
       items: (json['items'] as List).map((e) => InvoiceItemModel.fromJson(e)).toList(),
       subtotal: (json['subtotal'] as num).toDouble(),
       discount: (json['discount'] as num?)?.toDouble() ?? 0.0,

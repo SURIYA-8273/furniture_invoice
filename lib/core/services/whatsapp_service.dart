@@ -39,7 +39,7 @@ class WhatsAppService {
   /// Create pre-filled message for invoice
   String _createInvoiceMessage(InvoiceEntity invoice) {
     final buffer = StringBuffer();
-    buffer.writeln('Dear ${invoice.customerName},');
+    buffer.writeln('Hello,');
     buffer.writeln();
     buffer.writeln('Your invoice ${invoice.invoiceNumber} details:');
     buffer.writeln('Amount: ₹${invoice.grandTotal.toStringAsFixed(2)}');

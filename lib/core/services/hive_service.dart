@@ -3,7 +3,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import '../constants/hive_box_names.dart';
 import '../../data/models/business_profile_model.dart';
-import '../../data/models/customer_model.dart';
 import '../../data/models/product_model.dart';
 import '../../data/models/invoice_model.dart';
 import '../../data/models/invoice_item_model.dart';
@@ -35,7 +34,6 @@ class HiveService {
       
       // Register all adapters
       Hive.registerAdapter(BusinessProfileModelAdapter()); // typeId: 0
-      Hive.registerAdapter(CustomerModelAdapter()); // typeId: 1
       Hive.registerAdapter(ProductModelAdapter()); // typeId: 2
       Hive.registerAdapter(PaymentHistoryModelAdapter()); // typeId: 3
       Hive.registerAdapter(InvoiceModelAdapter()); // typeId: 4
@@ -67,11 +65,6 @@ class HiveService {
       
       await Hive.openBox(
         HiveBoxNames.businessProfile,
-        encryptionCipher: HiveAesCipher(encryptionKey),
-      );
-      
-      await Hive.openBox(
-        HiveBoxNames.customers,
         encryptionCipher: HiveAesCipher(encryptionKey),
       );
       

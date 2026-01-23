@@ -18,7 +18,7 @@ class PaymentHistoryModelAdapter extends TypeAdapter<PaymentHistoryModel> {
     };
     return PaymentHistoryModel(
       id: fields[0] as String,
-      customerId: fields[1] as String,
+      invoiceId: fields[1] as String?,
       paymentDate: fields[2] as DateTime,
       paidAmount: fields[3] as double,
       paymentMode: fields[4] as String,
@@ -36,7 +36,7 @@ class PaymentHistoryModelAdapter extends TypeAdapter<PaymentHistoryModel> {
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.customerId)
+      ..write(obj.invoiceId)
       ..writeByte(2)
       ..write(obj.paymentDate)
       ..writeByte(3)

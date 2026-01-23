@@ -19,55 +19,49 @@ class InvoiceModelAdapter extends TypeAdapter<InvoiceModel> {
     return InvoiceModel(
       id: fields[0] as String,
       invoiceNumber: fields[1] as String,
-      customerId: fields[2] as String,
-      customerName: fields[3] as String,
-      items: (fields[4] as List).cast<InvoiceItemModel>(),
-      subtotal: fields[5] as double,
-      discount: fields[6] as double,
-      gst: fields[7] as double,
-      grandTotal: fields[8] as double,
-      paidAmount: fields[9] as double,
-      balanceAmount: fields[10] as double,
-      status: fields[11] as String,
-      invoiceDate: fields[12] as DateTime,
-      createdAt: fields[13] as DateTime,
-      updatedAt: fields[14] as DateTime,
+      items: (fields[2] as List).cast<InvoiceItemModel>(),
+      subtotal: fields[3] as double,
+      discount: fields[4] as double,
+      gst: fields[5] as double,
+      grandTotal: fields[6] as double,
+      paidAmount: fields[7] as double,
+      balanceAmount: fields[8] as double,
+      status: fields[9] as String,
+      invoiceDate: fields[10] as DateTime,
+      createdAt: fields[11] as DateTime,
+      updatedAt: fields[12] as DateTime,
     );
   }
 
   @override
   void write(BinaryWriter writer, InvoiceModel obj) {
     writer
-      ..writeByte(15)
+      ..writeByte(13)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
       ..write(obj.invoiceNumber)
       ..writeByte(2)
-      ..write(obj.customerId)
-      ..writeByte(3)
-      ..write(obj.customerName)
-      ..writeByte(4)
       ..write(obj.items)
-      ..writeByte(5)
+      ..writeByte(3)
       ..write(obj.subtotal)
-      ..writeByte(6)
+      ..writeByte(4)
       ..write(obj.discount)
-      ..writeByte(7)
+      ..writeByte(5)
       ..write(obj.gst)
-      ..writeByte(8)
+      ..writeByte(6)
       ..write(obj.grandTotal)
-      ..writeByte(9)
+      ..writeByte(7)
       ..write(obj.paidAmount)
-      ..writeByte(10)
+      ..writeByte(8)
       ..write(obj.balanceAmount)
-      ..writeByte(11)
+      ..writeByte(9)
       ..write(obj.status)
-      ..writeByte(12)
+      ..writeByte(10)
       ..write(obj.invoiceDate)
-      ..writeByte(13)
+      ..writeByte(11)
       ..write(obj.createdAt)
-      ..writeByte(14)
+      ..writeByte(12)
       ..write(obj.updatedAt);
   }
 

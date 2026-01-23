@@ -5,9 +5,6 @@ abstract class PaymentHistoryRepository {
   /// Add a new payment record
   Future<void> addPayment(PaymentHistoryEntity payment);
 
-  /// Get all payments for a specific customer
-  Future<List<PaymentHistoryEntity>> getCustomerPayments(String customerId);
-
   /// Get a specific payment by ID
   Future<PaymentHistoryEntity?> getPaymentById(String paymentId);
 

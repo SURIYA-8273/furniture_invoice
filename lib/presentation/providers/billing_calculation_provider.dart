@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../domain/entities/invoice_item_entity.dart';
-import '../../domain/entities/customer_entity.dart';
 
 /// Provider for managing billing calculations in real-time.
 /// Supports fully editable fields with automatic recalculation.
@@ -19,11 +18,6 @@ class BillingCalculationProvider extends ChangeNotifier {
   DateTime _invoiceDate = DateTime.now();
   DateTime? _dueDate;
   String _paymentTerms = '';
-  
-  // Customer details
-  CustomerEntity? _selectedCustomer;
-  String _shippingAddress = '';
-  bool _sameAsBilling = true;
   
   // Payment details
   String _paymentMethod = 'Cash';
@@ -47,11 +41,6 @@ class BillingCalculationProvider extends ChangeNotifier {
   DateTime get invoiceDate => _invoiceDate;
   DateTime? get dueDate => _dueDate;
   String get paymentTerms => _paymentTerms;
-  
-  // Getters - Customer
-  CustomerEntity? get selectedCustomer => _selectedCustomer;
-  String get shippingAddress => _shippingAddress;
-  bool get sameAsBilling => _sameAsBilling;
   
   // Getters - Payment
   String get paymentMethod => _paymentMethod;
@@ -92,21 +81,33 @@ class BillingCalculationProvider extends ChangeNotifier {
   /// Add a new item to the invoice
   void addItem({
     required String productName,
-    required String size,
-    required double mrp,
+    InvoiceItemType type = InvoiceItemType.measurement,
+    String? size,
+    double mrp = 0.0,
     int quantity = 1,
+    double? totalQuantity, // For direct items
   }) {
-    final squareFeet = InvoiceItemEntity.calculateSquareFeetFromSize(size);
-    final totalQuantity = InvoiceItemEntity.calculateTotalQuantity(squareFeet, quantity);
-    final totalAmount = InvoiceItemEntity.calculateTotalAmount(mrp, totalQuantity);
+    double finalSqFt = 0.0;
+    double finalTotalQty = 0.0;
+
+    if (type == InvoiceItemType.measurement) {
+       finalSqFt = InvoiceItemEntity.calculateSquareFeetFromSize(size ?? '');
+       finalTotalQty = InvoiceItemEntity.calculateTotalQuantity(finalSqFt, quantity);
+    } else {
+       // Direct
+       finalTotalQty = totalQuantity ?? 1.0;
+    }
+
+    final totalAmount = InvoiceItemEntity.calculateTotalAmount(mrp, finalTotalQty);
 
     final item = InvoiceItemEntity(
       id: const Uuid().v4(),
       productName: productName,
-      size: size,
-      squareFeet: squareFeet,
+      type: type,
+      size: size ?? '',
+      squareFeet: finalSqFt,
       quantity: quantity,
-      totalQuantity: totalQuantity,
+      totalQuantity: finalTotalQty,
       mrp: mrp,
       totalAmount: totalAmount,
     );
@@ -138,8 +139,8 @@ class BillingCalculationProvider extends ChangeNotifier {
 
     final item = _items[index];
 
-    // If size changed, recalculate square feet
-    if (size != null && size != item.size) {
+    // If size changed, recalculate square feet (Only for measurement items)
+    if (item.type == InvoiceItemType.measurement && size != null && size != item.size) {
       squareFeet = InvoiceItemEntity.calculateSquareFeetFromSize(size);
     }
 
@@ -149,8 +150,15 @@ class BillingCalculationProvider extends ChangeNotifier {
     final newMrp = mrp ?? item.mrp;
 
     // Recalculate dependent fields if not manually overridden
-    final newTotalQuantity = totalQuantity ??
-        InvoiceItemEntity.calculateTotalQuantity(newSquareFeet, newQuantity);
+    double newTotalQuantity = totalQuantity ?? item.totalQuantity;
+    
+    // Auto-calc total quantity only if type is measurement AND totalQuantity wasn't explicitly passed
+    if (item.type == InvoiceItemType.measurement && totalQuantity == null) {
+       newTotalQuantity = InvoiceItemEntity.calculateTotalQuantity(newSquareFeet, newQuantity);
+    } 
+    // For direct/service items, totalQuantity is either passed or remains same.
+    // If user passed a new quantity but not totalQuantity (weird case for direct), we might assume they mean totalQuantity?
+    // But for direct items, 'quantity' (pieces) is usually unused/irrelevant or 1.
     
     final newTotalAmount = totalAmount ??
         InvoiceItemEntity.calculateTotalAmount(newMrp, newTotalQuantity);
@@ -218,30 +226,6 @@ class BillingCalculationProvider extends ChangeNotifier {
     notifyListeners();
   }
   
-  /// Set selected customer
-  void setSelectedCustomer(CustomerEntity? customer) {
-    _selectedCustomer = customer;
-    if (_sameAsBilling && customer != null) {
-      _shippingAddress = customer.address ?? '';
-    }
-    notifyListeners();
-  }
-  
-  /// Set shipping address
-  void setShippingAddress(String value) {
-    _shippingAddress = value;
-    notifyListeners();
-  }
-  
-  /// Toggle same as billing
-  void setSameAsBilling(bool value) {
-    _sameAsBilling = value;
-    if (value && _selectedCustomer != null) {
-      _shippingAddress = _selectedCustomer!.address ?? '';
-    }
-    notifyListeners();
-  }
-  
   /// Set payment method
   void setPaymentMethod(String value) {
     _paymentMethod = value;
@@ -279,9 +263,6 @@ class BillingCalculationProvider extends ChangeNotifier {
     notifyListeners();
   }
   
-  /// Validation: Check if customer is selected
-  bool get hasCustomer => _selectedCustomer != null;
-  
   /// Validation: Check if items exist
   bool get hasItems => _items.isNotEmpty;
   
@@ -298,7 +279,7 @@ class BillingCalculationProvider extends ChangeNotifier {
   
   /// Validation: Check if all required fields are filled
   bool get isValid {
-    return hasCustomer && hasItems && isDueDateValid && isAdvancePaymentValid;
+    return hasItems && isDueDateValid && isAdvancePaymentValid;
   }
 
   /// Clear all items and reset
@@ -311,9 +292,6 @@ class BillingCalculationProvider extends ChangeNotifier {
     _invoiceDate = DateTime.now();
     _dueDate = null;
     _paymentTerms = '';
-    _selectedCustomer = null;
-    _shippingAddress = '';
-    _sameAsBilling = true;
     _paymentMethod = 'Cash';
     _notes = '';
     _termsAndConditions = '';

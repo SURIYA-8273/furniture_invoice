@@ -77,23 +77,6 @@ class ValidationUtils {
     return null;
   }
 
-  /// Validate customer name
-  static String? validateCustomerName(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Customer name is required';
-    }
-
-    if (value.trim().length < AppConstants.minCustomerNameLength) {
-      return 'Customer name must be at least ${AppConstants.minCustomerNameLength} characters';
-    }
-
-    if (value.trim().length > AppConstants.maxCustomerNameLength) {
-      return 'Customer name must not exceed ${AppConstants.maxCustomerNameLength} characters';
-    }
-
-    return null;
-  }
-
   /// Validate product name
   static String? validateProductName(String? value) {
     if (value == null || value.trim().isEmpty) {

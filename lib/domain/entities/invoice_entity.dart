@@ -5,8 +5,6 @@ import 'invoice_item_entity.dart';
 class InvoiceEntity {
   final String id;
   final String invoiceNumber; // INV-000001
-  final String customerId;
-  final String customerName; // Denormalized for quick access
   final List<InvoiceItemEntity> items;
   final double subtotal; // Sum of all item amounts
   final double discount; // Discount amount
@@ -22,8 +20,6 @@ class InvoiceEntity {
   InvoiceEntity({
     required this.id,
     required this.invoiceNumber,
-    required this.customerId,
-    required this.customerName,
     required this.items,
     required this.subtotal,
     this.discount = 0.0,
@@ -69,8 +65,6 @@ class InvoiceEntity {
   InvoiceEntity copyWith({
     String? id,
     String? invoiceNumber,
-    String? customerId,
-    String? customerName,
     List<InvoiceItemEntity>? items,
     double? subtotal,
     double? discount,
@@ -86,8 +80,6 @@ class InvoiceEntity {
     return InvoiceEntity(
       id: id ?? this.id,
       invoiceNumber: invoiceNumber ?? this.invoiceNumber,
-      customerId: customerId ?? this.customerId,
-      customerName: customerName ?? this.customerName,
       items: items ?? this.items,
       subtotal: subtotal ?? this.subtotal,
       discount: discount ?? this.discount,
@@ -104,7 +96,7 @@ class InvoiceEntity {
 
   @override
   String toString() {
-    return 'InvoiceEntity(number: $invoiceNumber, customer: $customerName, total: ${grandTotal.toStringAsFixed(2)}, status: $status)';
+    return 'InvoiceEntity(number: $invoiceNumber, total: ${grandTotal.toStringAsFixed(2)}, status: $status)';
   }
 
   @override
@@ -114,7 +106,6 @@ class InvoiceEntity {
     return other is InvoiceEntity &&
         other.id == id &&
         other.invoiceNumber == invoiceNumber &&
-        other.customerId == customerId &&
         other.grandTotal == grandTotal &&
         other.status == status;
   }
@@ -123,7 +114,6 @@ class InvoiceEntity {
   int get hashCode {
     return id.hashCode ^
         invoiceNumber.hashCode ^
-        customerId.hashCode ^
         grandTotal.hashCode ^
         status.hashCode;
   }
