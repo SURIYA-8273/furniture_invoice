@@ -6,11 +6,13 @@ import '../../../../core/theme/app_theme.dart';
 class InvoiceListItem extends StatelessWidget {
   final InvoiceEntity invoice;
   final VoidCallback onTap;
+  final VoidCallback? onDelete;
 
   const InvoiceListItem({
     super.key,
     required this.invoice,
     required this.onTap,
+    this.onDelete,
   });
 
   @override
@@ -37,26 +39,38 @@ class InvoiceListItem extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         side: BorderSide(color: Colors.grey.withOpacity(0.2)),
       ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'BILL #${invoice.invoiceNumber}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.grey[600],
-                      fontWeight: FontWeight.w500,
+                   Expanded(
+                    child: Text(
+                      'BILL NO : ${invoice.invoiceNumber}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
+                  if (onDelete != null)
+                    IconButton(
+                        onPressed: onDelete,
+                        icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                        tooltip: 'Delete Bill',
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        visualDensity: VisualDensity.compact,
+                    ),
+                  const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
@@ -73,7 +87,7 @@ class InvoiceListItem extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -95,20 +109,34 @@ class InvoiceListItem extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(height: 4),
+
                         Text(
-                          'Total: ${currencyFormat.format(invoice.grandTotal)}',
+                          'TOTAL: ${currencyFormat.format(invoice.grandTotal)}',
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: Colors.grey[600],
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 1),
                         Text(
-                          dateFormat.format(invoice.invoiceDate),
+                         'DATE : ${dateFormat.format(invoice.invoiceDate)}' ,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: Colors.grey[500],
+                            fontSize: 12,
                           ),
                         ),
+                        if (invoice.customerName != null && invoice.customerName!.isNotEmpty) ...[
+
+
+                          Text(
+                            'CUS : ${invoice.customerName!}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: Colors.grey[500],
+                              fontSize: 12,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ],
                     ),
                   ),

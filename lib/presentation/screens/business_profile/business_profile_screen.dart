@@ -20,12 +20,7 @@ class BusinessProfileScreen extends StatefulWidget {
 class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final _businessNameController = TextEditingController();
-  final _whatsappNumberController = TextEditingController();
   final _primaryPhoneController = TextEditingController();
-  final _additionalPhoneController = TextEditingController();
-  final _instagramIdController = TextEditingController();
-  final _websiteUrlController = TextEditingController();
-  final _gstNumberController = TextEditingController();
   final _businessAddressController = TextEditingController();
 
   String? _logoPath;
@@ -43,12 +38,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
 
     if (profile != null) {
       _businessNameController.text = profile.businessName;
-      _whatsappNumberController.text = profile.whatsappNumber ?? '';
       _primaryPhoneController.text = profile.primaryPhone ?? '';
-      _additionalPhoneController.text = profile.additionalPhone ?? '';
-      _instagramIdController.text = profile.instagramId ?? '';
-      _websiteUrlController.text = profile.websiteUrl ?? '';
-      _gstNumberController.text = profile.gstNumber ?? '';
       _businessAddressController.text = profile.businessAddress ?? '';
       _logoPath = profile.logoPath;
     }
@@ -91,24 +81,9 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
     final success = await provider.saveProfile(
       businessName: _businessNameController.text.trim(),
       logoPath: _logoPath,
-      whatsappNumber: _whatsappNumberController.text.trim().isEmpty
-          ? null
-          : _whatsappNumberController.text.trim(),
       primaryPhone: _primaryPhoneController.text.trim().isEmpty
           ? null
           : _primaryPhoneController.text.trim(),
-      additionalPhone: _additionalPhoneController.text.trim().isEmpty
-          ? null
-          : _additionalPhoneController.text.trim(),
-      instagramId: _instagramIdController.text.trim().isEmpty
-          ? null
-          : _instagramIdController.text.trim(),
-      websiteUrl: _websiteUrlController.text.trim().isEmpty
-          ? null
-          : _websiteUrlController.text.trim(),
-      gstNumber: _gstNumberController.text.trim().isEmpty
-          ? null
-          : _gstNumberController.text.trim(),
       businessAddress: _businessAddressController.text.trim().isEmpty
           ? null
           : _businessAddressController.text.trim(),
@@ -134,15 +109,9 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
     }
   }
 
-  @override
   void dispose() {
     _businessNameController.dispose();
-    _whatsappNumberController.dispose();
     _primaryPhoneController.dispose();
-    _additionalPhoneController.dispose();
-    _instagramIdController.dispose();
-    _websiteUrlController.dispose();
-    _gstNumberController.dispose();
     _businessAddressController.dispose();
     super.dispose();
   }
@@ -156,11 +125,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
       appBar: AppBar(
         title: Text(l10n.businessProfile),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: _saveProfile,
-            tooltip: l10n.save,
-          ),
+         
         ],
       ),
       body: Consumer<BusinessProfileProvider>(
@@ -206,15 +171,8 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                         ),
                       ),
                       SizedBox(height: ThemeTokens.spacingSm),
-                      TextButton.icon(
-                        onPressed: _pickImage,
-                        icon: const Icon(Icons.upload),
-                        label: Text(l10n.uploadLogo),
-                      ),
-                      Text(
-                        '(${l10n.optional})',
-                        style: theme.textTheme.bodySmall,
-                      ),
+                      
+        
                     ],
                   ),
                 ),
@@ -233,125 +191,78 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                   textCapitalization: TextCapitalization.words,
                 ),
 
-                SizedBox(height: ThemeTokens.spacingMd),
-
-                // WhatsApp Number (Optional)
-                TextFormField(
-                  controller: _whatsappNumberController,
-                  decoration: InputDecoration(
-                    labelText: '${l10n.whatsappNumber} (${l10n.optional})',
-                    hintText: '9876543210',
-                    prefixIcon: const Icon(Icons.chat),
-                  ),
-                  keyboardType: TextInputType.phone,
-                  validator: (value) => ValidationUtils.validatePhoneNumber(value, required: false),
-                ),
+      
 
                 SizedBox(height: ThemeTokens.spacingMd),
 
-                // Primary Phone (Optional)
+                // Primary Phone (Required)
                 TextFormField(
                   controller: _primaryPhoneController,
                   decoration: InputDecoration(
-                    labelText: '${l10n.primaryPhone} (${l10n.optional})',
+                    labelText: '${l10n.primaryPhone} *',
                     hintText: '9876543210',
                     prefixIcon: const Icon(Icons.phone),
                   ),
                   keyboardType: TextInputType.phone,
-                  validator: (value) => ValidationUtils.validatePhoneNumber(value, required: false),
+                  validator: (value) => ValidationUtils.validatePhoneNumber(value, required: true),
                 ),
 
+         
+             
+           
+              
+
+              
                 SizedBox(height: ThemeTokens.spacingMd),
 
-                // Additional Phone (Optional)
-                TextFormField(
-                  controller: _additionalPhoneController,
-                  decoration: InputDecoration(
-                    labelText: '${l10n.additionalPhone} (${l10n.optional})',
-                    hintText: '9876543210',
-                    prefixIcon: const Icon(Icons.phone_android),
-                  ),
-                  keyboardType: TextInputType.phone,
-                  validator: (value) => ValidationUtils.validatePhoneNumber(value, required: false),
-                ),
-
-                SizedBox(height: ThemeTokens.spacingMd),
-
-                // Instagram ID (Optional)
-                TextFormField(
-                  controller: _instagramIdController,
-                  decoration: InputDecoration(
-                    labelText: '${l10n.instagramId} (${l10n.optional})',
-                    hintText: '@yourbusiness',
-                    prefixIcon: const Icon(Icons.camera_alt),
-                  ),
-                ),
-
-                SizedBox(height: ThemeTokens.spacingMd),
-
-                // Website URL (Optional)
-                TextFormField(
-                  controller: _websiteUrlController,
-                  decoration: InputDecoration(
-                    labelText: '${l10n.websiteUrl} (${l10n.optional})',
-                    hintText: 'https://www.example.com',
-                    prefixIcon: const Icon(Icons.language),
-                  ),
-                  keyboardType: TextInputType.url,
-                  validator: (value) => ValidationUtils.validateUrl(value, required: false),
-                ),
-
-                SizedBox(height: ThemeTokens.spacingMd),
-
-                // GST Number (Optional)
-                TextFormField(
-                  controller: _gstNumberController,
-                  decoration: InputDecoration(
-                    labelText: '${l10n.gstNumber} (${l10n.optional})',
-                    hintText: '22AAAAA0000A1Z5',
-                    prefixIcon: const Icon(Icons.receipt),
-                  ),
-                  textCapitalization: TextCapitalization.characters,
-                  validator: (value) => ValidationUtils.validateGstNumber(value, required: false),
-                ),
-
-                SizedBox(height: ThemeTokens.spacingMd),
-
-                // Business Address (Optional)
+                // Business Address (Required)
                 TextFormField(
                   controller: _businessAddressController,
                   decoration: InputDecoration(
-                    labelText: '${l10n.businessAddress} (${l10n.optional})',
+                    labelText: '${l10n.businessAddress} *',
                     hintText: l10n.businessAddress,
                     prefixIcon: const Icon(Icons.location_on),
                   ),
                   maxLines: 3,
                   textCapitalization: TextCapitalization.sentences,
+                  validator: (value) => value == null || value.trim().isEmpty ? l10n.required : null,
                 ),
 
                 SizedBox(height: ThemeTokens.spacingXl),
 
-                // Save Button
-                ElevatedButton.icon(
-                  onPressed: _saveProfile,
-                  icon: const Icon(Icons.save),
-                  label: Text(l10n.save),
-                ),
 
-                SizedBox(height: ThemeTokens.spacingMd),
 
-                // Info Text
-                Text(
-                  '* ${l10n.required}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: ThemeTokens.errorColor,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+      
               ],
             ),
           );
         },
+      ),
+      bottomNavigationBar: Container(
+        padding: EdgeInsets.all(ThemeTokens.spacingMd),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          boxShadow: [
+             BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: SafeArea( 
+          child: ElevatedButton.icon(
+            onPressed: _saveProfile,
+            icon: const Icon(Icons.save),
+            label: Text(l10n.save),
+             style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              foregroundColor: Colors.white,
+              backgroundColor: ThemeTokens.primaryColor,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(ThemeTokens.radiusMedium)),
+            ),
+          ),
+        ),
       ),
     );
   }

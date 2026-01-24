@@ -22,4 +22,10 @@ abstract class InvoiceRepository {
 
   /// Get invoices with pending balance
   Future<List<InvoiceEntity>> getUnpaidInvoices();
+
+  /// Get next sequential invoice number (e.g. 1001)
+  Future<int> getNextInvoiceNumber();
+
+  /// Get invoice by number (for duplicate checks)
+  Future<InvoiceEntity?> getInvoiceByNumber(String invoiceNumber);
 }

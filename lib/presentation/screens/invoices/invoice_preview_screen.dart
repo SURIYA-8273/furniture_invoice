@@ -169,11 +169,11 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
       body: _isLoading 
         ? const Center(child: CircularProgressIndicator())
         : SingleChildScrollView(
-          padding: const EdgeInsets.all(0.0),
           child: Column(
             children: [
               // Invoice Card
               Container(
+                padding: const EdgeInsets.only(top: 10),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(ThemeTokens.radiusMedium),
@@ -257,8 +257,8 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
           // Logo
           if (businessProfile?.logoPath != null)
             Container(
-              width: 60,
-              height: 60,
+              width: 80,
+              height: 80,
               decoration: BoxDecoration(
                 color: Colors.black,
                 borderRadius: BorderRadius.circular(12),
@@ -297,24 +297,23 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
           
           const SizedBox(height: 2),
           
-          // Contact Details
-          Text(
-              businessProfile?.primaryPhone != null 
-                ? '+91 ${businessProfile!.primaryPhone}' 
-                : 'Contact Information',
-              style: TextStyle(color: Colors.grey[600], fontSize: 13),
-              textAlign: TextAlign.center,
-          ),
+          // Contact Details (Centered)
+          if (businessProfile?.primaryPhone != null)
+             Text(
+               'Phone: ${businessProfile!.primaryPhone}',
+               style: TextStyle(color: Colors.grey[600], fontSize: 13),
+               textAlign: TextAlign.center,
+             ),
           if (businessProfile?.businessAddress != null)
             Padding(
-              padding: const EdgeInsets.only(top: 4),
+              padding: const EdgeInsets.only(top: 2),
               child: Text(
                 businessProfile!.businessAddress!,
                 style: TextStyle(color: Colors.grey[600], fontSize: 13),
                 textAlign: TextAlign.center,
               ),
             ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 10),
         ],
       ),
     );
@@ -322,61 +321,30 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
 
   Widget _buildInvoiceDetails() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0,vertical:10
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Left Side: Bill To
-          if (widget.invoice.customerName != null && widget.invoice.customerName!.isNotEmpty)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                 Text(
-                  'BILL TO',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  widget.invoice.customerName!,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.black,
-                  ),
-                ),
-              ],
-            )
-          else
-            const SizedBox(), // Empty if no customer name
-
-          // Right Side: Bill No & Date
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                'BILL NO : ${widget.invoice.invoiceNumber.split('-').last}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                  color: Colors.black,
-                ),
+        
+          
+            Text(
+              'NAME : ${widget.invoice.customerName ?? '-'}',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Colors.black,
               ),
-              const SizedBox(height: 4),
-              Text(
-                'DATE : ${DateFormat('dd-MM-yyyy').format(widget.invoice.invoiceDate)}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                  color: Colors.black,
-                ),
-              ),
-            ],
+              textAlign: TextAlign.center,
+            ),
+      
+          Text(
+            'DATE : ${DateFormat('dd-MM-yyyy').format(widget.invoice.invoiceDate)}',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: Colors.black,
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),

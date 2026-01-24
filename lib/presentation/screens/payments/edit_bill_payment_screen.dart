@@ -9,6 +9,7 @@ import '../../providers/payment_history_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/utils/calculation_utils.dart';
+import '../invoices/invoice_preview_screen.dart';
 
 class EditBillPaymentScreen extends StatefulWidget {
   final InvoiceEntity invoice;
@@ -87,7 +88,13 @@ class _EditBillPaymentScreenState extends State<EditBillPaymentScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Payment updated and saved successfully!')),
         );
-        Navigator.pop(context);
+        // Navigate to Preview with updated invoice
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => InvoicePreviewScreen(invoice: updatedInvoice),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -366,39 +373,59 @@ class _EditBillPaymentScreenState extends State<EditBillPaymentScreen> {
     _paymentController.clear(); // Clear previous value
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Enter Payment Amount', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: TextField(
-          controller: _paymentController,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          autofocus: true,
-          decoration: InputDecoration(
-            prefixText: '₹ ',
-            hintText: '0.00',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-            filled: true,
-            fillColor: Colors.grey[50],
-          ),
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('CANCEL', style: TextStyle(color: Colors.grey)),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-               _handleSave(); // Proceed with save using the controller value
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: ThemeTokens.primaryColor,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-            child: const Text('SAVE', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-          ),
-        ],
-      ),
+      builder: (ctx) {
+        String? errorText;
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Enter Payment Amount', style: TextStyle(fontWeight: FontWeight.bold)),
+              content: TextField(
+                controller: _paymentController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                autofocus: true,
+                decoration: InputDecoration(
+                  prefixText: '₹ ',
+                  hintText: '0.00',
+                  errorText: errorText, // Show error here
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  filled: true,
+                  fillColor: Colors.grey[50],
+                ),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                onChanged: (_) {
+                  if (errorText != null) {
+                    setState(() => errorText = null);
+                  }
+                },
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('CANCEL', style: TextStyle(color: Colors.grey)),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    final val = double.tryParse(_paymentController.text) ?? 0.0;
+                    if (val > _currentInvoice.balanceAmount) {
+                      setState(() {
+                         errorText = 'Max: ${_currentInvoice.balanceAmount}';
+                      });
+                      return;
+                    }
+                    Navigator.pop(ctx);
+                     _handleSave();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ThemeTokens.primaryColor,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: const Text('SAVE', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                ),
+              ],
+            );
+          }
+        );
+      },
     );
   }
 

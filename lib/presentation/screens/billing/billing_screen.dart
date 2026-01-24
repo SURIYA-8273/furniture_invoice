@@ -29,10 +29,14 @@ class _BillingScreenState extends State<BillingScreen> {
     _paidAmountController = TextEditingController();
     
     // Generate invoice number on init
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = context.read<BillingCalculationProvider>();
-      provider.generateInvoiceNumber();
-      _paidAmountController.text = provider.advancePayment.toInt().toString();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final invoiceProvider = context.read<InvoiceProvider>();
+      final billingProvider = context.read<BillingCalculationProvider>();
+      
+      final nextNumber = await invoiceProvider.getNextInvoiceNumber();
+      billingProvider.generateInvoiceNumber(nextNumber: nextNumber);
+      
+      _paidAmountController.text = billingProvider.advancePayment.toInt().toString();
     });
   }
 
@@ -89,6 +93,47 @@ class _BillingScreenState extends State<BillingScreen> {
     );
   }
 
+  Future<void> _showClearConfirmationDialog(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Clear All Data?'),
+        content: const Text('This will reset all billing items and payment details. This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('CANCEL'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('CLEAR ALL'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      final provider = context.read<BillingCalculationProvider>();
+      provider.clear();
+      _paidAmountController.text = '0';
+      
+      // Re-generate invoice number if needed (optional, clear() might reset it)
+      // Actually clear() resets invoice number to empty string.
+      // We should regenerate it to keep the flow smooth or let user know.
+      // Let's regenerate it.
+      final invoiceProvider = context.read<InvoiceProvider>();
+      final nextNumber = await invoiceProvider.getNextInvoiceNumber();
+      provider.generateInvoiceNumber(nextNumber: nextNumber);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('All data cleared')),
+        );
+      }
+    }
+  }
+
 
 
 
@@ -98,7 +143,19 @@ class _BillingScreenState extends State<BillingScreen> {
     final theme = Theme.of(context);
     final provider = context.watch<BillingCalculationProvider>();
 
-    return Scaffold(
+    return PopScope(
+      canPop: true,
+      onPopInvoked: (didPop) {
+        if (didPop) {
+           // Clear data when leaving the screen
+           WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (context.mounted) {
+                 context.read<BillingCalculationProvider>().clear();
+              }
+           });
+        }
+      },
+      child: Scaffold(
       backgroundColor: Colors.grey[50], // Light background for contrast
       appBar: AppBar(
         title: Text(
@@ -108,11 +165,11 @@ class _BillingScreenState extends State<BillingScreen> {
         centerTitle: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.add, color: Colors.black),
-            tooltip: 'Add Measurement',
-            onPressed: () => _addItem(),
+            icon: const Icon(Icons.delete_sweep, color: Colors.grey),
+            tooltip: 'Clear All Data',
+            onPressed: () => _showClearConfirmationDialog(context),
           ),
-
+          const SizedBox(width: 8),
         ],
       ),
       body: Form(
@@ -264,22 +321,45 @@ class _BillingScreenState extends State<BillingScreen> {
                     const SizedBox(height: 10),
   
                     // 4. Save Button
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: _saveBilling,
-                        icon: const Icon(Icons.receipt_long, size: 16),
-                        label: const Text('SAVE BILLING'),
-                        style: ElevatedButton.styleFrom(
-                          // backgroundColor: Colors.black, // Inherit blue
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                          elevation: 8,
-                          shadowColor: Colors.black45,
-                          textStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 1.0),
+                    // 4. Action Buttons Row (Add Item & Save)
+                    Row(
+                      children: [
+                        // Add Item Button
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: _addItem,
+                            icon: const Icon(Icons.add, size: 16),
+                            label: const Text('ADD ITEM'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.blue,
+                              side: const BorderSide(color: Colors.blue, width: 2),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                              elevation: 0,
+                              textStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, letterSpacing: 1.0),
+                            ),
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 12),
+                        // Save Button
+                        Expanded(
+                           flex: 2,
+                           child: ElevatedButton.icon(
+                            onPressed: (provider.hasItems && !provider.hasInvalidItems) ? _saveBilling : null,
+                            icon: const Icon(Icons.receipt_long, size: 16),
+                            label: const Text('NEXT'),
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                              elevation: 8,
+                              shadowColor: Colors.black45,
+                              textStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 1.0),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -288,6 +368,8 @@ class _BillingScreenState extends State<BillingScreen> {
           ],
         ),
       ),
+
+    ),
     );
   }
 
@@ -353,8 +435,9 @@ class _BillingScreenState extends State<BillingScreen> {
             ),
             _buildHeaderCell(theme, 'LENGTH', flex: 1, showRightBorder: true),
             _buildHeaderCell(theme, 'QTY', flex: 1, showRightBorder: true),
+              _buildHeaderCell(theme, 'RATE', flex: 1, showRightBorder: true),
             _buildHeaderCell(theme, 'TOTAL LENGTH', flex: 1, showRightBorder: true),
-            _buildHeaderCell(theme, 'RATE', flex: 1, showRightBorder: true),
+          
             _buildHeaderCell(theme, 'TOTAL', flex: 2, align: TextAlign.right, showRightBorder: false),
           ],
         ),
@@ -444,11 +527,83 @@ class _EditableBillingRowState extends State<_EditableBillingRow> {
   late TextEditingController _qtyController;
   late TextEditingController _totQtyController;
   late TextEditingController _rateController;
+  
+  final LayerLink _layerLink = LayerLink();
+  OverlayEntry? _overlayEntry;
+  final FocusNode _widthFocus = FocusNode();
+  final FocusNode _heightFocus = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _initializeControllers();
+    _widthFocus.addListener(_onFocusChange);
+    _heightFocus.addListener(_onFocusChange);
+  }
+
+  void _onFocusChange() {
+    if (_widthFocus.hasFocus || _heightFocus.hasFocus) {
+       _showOverlay();
+    } else {
+       _removeOverlay();
+    }
+  }
+
+  void _showOverlay() {
+    if (_overlayEntry != null) return;
+    final uniqueSizes = widget.provider.uniqueSizes;
+    if (uniqueSizes.isEmpty) return;
+
+    final renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+
+    _overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        width: 150, // Fixed width for dropdown
+        child: CompositedTransformFollower(
+          link: _layerLink,
+          showWhenUnlinked: false,
+          offset: const Offset(0, 35), // Show below inputs
+          child: Material(
+            elevation: 4,
+            borderRadius: BorderRadius.circular(4),
+            color: Colors.white,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 150),
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                itemCount: uniqueSizes.length,
+                itemBuilder: (context, i) {
+                   final size = uniqueSizes[i];
+                   return InkWell(
+                     onTap: () {
+                        final parts = _parseSize(size);
+                        _widthController.text = parts[0];
+                        _heightController.text = parts[1];
+                        _onSizeChanged();
+                        _widthFocus.unfocus();
+                        _heightFocus.unfocus();
+                        _removeOverlay();
+                     },
+                     child: Padding(
+                       padding: const EdgeInsets.all(8.0),
+                       child: Text(size, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                     ),
+                   );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    Overlay.of(context).insert(_overlayEntry!);
+  }
+
+  void _removeOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
   }
 
   @override
@@ -540,6 +695,12 @@ class _EditableBillingRowState extends State<_EditableBillingRow> {
 
   @override
   void dispose() {
+    _widthFocus.removeListener(_onFocusChange);
+    _heightFocus.removeListener(_onFocusChange);
+    _widthFocus.dispose();
+    _heightFocus.dispose();
+    _removeOverlay();
+    
     _nameController.dispose();
     _widthController.dispose();
     _heightController.dispose();
@@ -598,12 +759,15 @@ class _EditableBillingRowState extends State<_EditableBillingRow> {
                     if (widget.item.type == InvoiceItemType.measurement) ...[
                       const SizedBox(height: 4),
                       // Split Size Inputs
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _widthController,
-                              decoration: InputDecoration(
+                      CompositedTransformTarget(
+                        link: _layerLink,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _widthController,
+                                focusNode: _widthFocus,
+                                decoration: InputDecoration(
                                 isDense: true,
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 2, vertical: 3),
                                 border: OutlineInputBorder(
@@ -629,6 +793,7 @@ class _EditableBillingRowState extends State<_EditableBillingRow> {
                           Expanded(
                             child: TextField(
                               controller: _heightController,
+                              focusNode: _heightFocus,
                               decoration: InputDecoration(
                                 isDense: true,
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 2, vertical: 3),
@@ -652,6 +817,7 @@ class _EditableBillingRowState extends State<_EditableBillingRow> {
                             ),
                           ),
                         ],
+                      ),
                       ),
                     ],
                   ],
@@ -694,8 +860,24 @@ class _EditableBillingRowState extends State<_EditableBillingRow> {
                   : const Center(child: Text('-', style: TextStyle(color: Colors.grey))),
               ),
             ),
+
+             // Col 4: RATE - Editable
+            Expanded(
+              flex: 1,
+              child: _buildCellWithBorder(
+                 child: _buildSmallTextField(
+                  controller: _rateController, 
+                  hintText: '0',
+                  onChanged: (val) {
+                     final v = double.tryParse(val);
+                     if (v != null) widget.provider.updateItemField(widget.index, mrp: v);
+                  }
+                ),
+              ),
+            ),
+            
   
-            // Col 4: TOT.QTY - Editable
+            // Col 5: TOT.QTY - Editable
             Expanded(
               flex: 1,
               child: _buildCellWithBorder(
@@ -711,21 +893,7 @@ class _EditableBillingRowState extends State<_EditableBillingRow> {
               ),
             ),
             
-            // Col 5: RATE - Editable
-            Expanded(
-              flex: 1,
-              child: _buildCellWithBorder(
-                 child: _buildSmallTextField(
-                  controller: _rateController, 
-                  hintText: '0',
-                  onChanged: (val) {
-                     final v = double.tryParse(val);
-                     if (v != null) widget.provider.updateItemField(widget.index, mrp: v);
-                  }
-                ),
-              ),
-            ),
-            
+           
             // Col 6: TOTAL - Read Only
             Expanded(
               flex: 2,

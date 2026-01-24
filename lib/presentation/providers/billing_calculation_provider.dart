@@ -5,6 +5,11 @@ import '../../domain/entities/invoice_item_entity.dart';
 /// Provider for managing billing calculations in real-time.
 /// Supports fully editable fields with automatic recalculation.
 class BillingCalculationProvider extends ChangeNotifier {
+  
+  BillingCalculationProvider() {
+    // Initialize with default state (one empty row)
+    clear();
+  }
   // Items
   List<InvoiceItemEntity> _items = [];
   
@@ -27,6 +32,19 @@ class BillingCalculationProvider extends ChangeNotifier {
   String _termsAndConditions = '';
   DateTime? _deliveryDate;
   String _referenceNumber = '';
+  
+  // Smart Suggestions
+  List<String> get uniqueSizes {
+    final sizes = _items
+        .map((item) => item.size)
+        .where((size) => size.isNotEmpty && size.contains('x'))
+        .toSet()
+        .toList();
+    // Sort logic removed to keep user's history order or basic sort? 
+    // Let's keep recent ones or just standard list.
+    // Ideally user might want most frequent, but unique list is a good start.
+    return sizes;
+  }
 
   // Getters - Items
   List<InvoiceItemEntity> get items => _items;
@@ -149,7 +167,35 @@ class BillingCalculationProvider extends ChangeNotifier {
     // Use provided values or keep existing
     final newSquareFeet = squareFeet ?? item.squareFeet;
     final newQuantity = quantity ?? item.quantity;
-    final newMrp = mrp ?? item.mrp;
+    double effectiveMrp = mrp ?? item.mrp;
+
+    // Auto-fill Rate Logic:
+    // If dimensions (size/squareFeet) changed and Rate wasn't manually entered in this update,
+    // check if any other item has the same dimensions and copy its Rate.
+    if (mrp == null && (size != null || squareFeet != null)) {
+       final effectiveSize = size ?? item.size;
+       final effectiveSqFt = squareFeet ?? item.squareFeet;
+       
+       // Search for a match in other items
+       for (final otherItem in _items) {
+         if (otherItem == item) continue; // Skip self
+         
+         bool isMatch = false;
+         // Match by Size string if available and not empty
+         // This ensures both Width and Height are the same (as they form the "W x H" string)
+         if (effectiveSize.isNotEmpty && otherItem.size.isNotEmpty && effectiveSize == otherItem.size) {
+           isMatch = true;
+         } 
+         // Removed fallback to squareFeet to strictly enforce "Width and Height must be same"
+
+         if (isMatch && otherItem.mrp > 0) {
+           effectiveMrp = otherItem.mrp;
+           break; // Found a match, stop
+         }
+       }
+    }
+
+    final newMrp = effectiveMrp;
 
     // Recalculate dependent fields if not manually overridden
     double newTotalQuantity = totalQuantity ?? item.totalQuantity;
@@ -282,10 +328,15 @@ class BillingCalculationProvider extends ChangeNotifier {
     notifyListeners();
   }
   
-  /// Generate auto invoice number
-  void generateInvoiceNumber() {
-    final now = DateTime.now();
-    _invoiceNumber = 'INV${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}-${now.millisecondsSinceEpoch.toString().substring(8)}';
+  /// Generate invoice number
+  void generateInvoiceNumber({int? nextNumber}) {
+    if (nextNumber != null) {
+      _invoiceNumber = 'BILL-$nextNumber';
+    } else {
+      // Fallback or initial dev state
+      final now = DateTime.now();
+      _invoiceNumber = 'BILL-${now.millisecondsSinceEpoch.toString().substring(8)}'; 
+    }
     notifyListeners();
   }
   
@@ -305,7 +356,12 @@ class BillingCalculationProvider extends ChangeNotifier {
   
   /// Validation: Check if all required fields are filled
   bool get isValid {
-    return hasItems && isDueDateValid && isAdvancePaymentValid;
+    return hasItems && isDueDateValid && isAdvancePaymentValid && !hasInvalidItems;
+  }
+
+  /// Validation: Check if any item has 0 total amount
+  bool get hasInvalidItems {
+    return _items.any((item) => item.totalAmount <= 0.001); // Basically 0
   }
 
   /// Clear all items and reset
@@ -323,6 +379,10 @@ class BillingCalculationProvider extends ChangeNotifier {
     _termsAndConditions = '';
     _deliveryDate = null;
     _referenceNumber = '';
+    
+    // Add default empty row as per user request
+    addItem(productName: '');
+    
     notifyListeners();
   }
 

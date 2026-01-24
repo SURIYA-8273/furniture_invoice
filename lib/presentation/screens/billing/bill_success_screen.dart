@@ -192,27 +192,48 @@ class _BillSuccessScreenState extends State<BillSuccessScreen> {
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: () async {
-                 // Construct Invoice Entity
-                final invoice = InvoiceEntity(
-                  id: const Uuid().v4(),
-                  invoiceNumber: provider.invoiceNumber,
-                  customerName: _customerNameController.text.trim().isNotEmpty ? _customerNameController.text.trim() : null,
-                  items: List.from(provider.items),
-                  subtotal: provider.subtotal,
-                  discount: provider.discount,
-                  gst: provider.gstAmount,
-                  grandTotal: provider.grandTotal,
-                  paidAmount: provider.advancePayment,
-                  balanceAmount: provider.balanceDue,
-                  status: InvoiceEntity.determineStatus(provider.grandTotal, provider.advancePayment),
-                  invoiceDate: provider.invoiceDate,
-                  createdAt: DateTime.now(),
-                  updatedAt: DateTime.now(),
-                );
-    
                 try {
-                   // Save to Repository
-                   await context.read<InvoiceProvider>().addInvoice(invoice);
+                   final invoiceProvider = context.read<InvoiceProvider>();
+                   final existingInvoice = await invoiceProvider.getInvoiceByNumber(provider.invoiceNumber);
+                   
+                   InvoiceEntity finalInvoice;
+
+                   if (existingInvoice != null) {
+                     // Update existing
+                     finalInvoice = existingInvoice.copyWith(
+                        customerName: _customerNameController.text.trim().isNotEmpty ? _customerNameController.text.trim() : existingInvoice.customerName,
+                        items: List.from(provider.items),
+                        subtotal: provider.subtotal,
+                        discount: provider.discount,
+                        gst: provider.gstAmount,
+                        grandTotal: provider.grandTotal,
+                        paidAmount: provider.advancePayment,
+                        balanceAmount: provider.balanceDue,
+                        status: InvoiceEntity.determineStatus(provider.grandTotal, provider.advancePayment),
+                        invoiceDate: provider.invoiceDate,
+                        updatedAt: DateTime.now(),
+                     );
+                     await invoiceProvider.updateInvoice(finalInvoice);
+                   } else {
+                     // Create new
+                      finalInvoice = InvoiceEntity(
+                        id: const Uuid().v4(),
+                        invoiceNumber: provider.invoiceNumber,
+                        customerName: _customerNameController.text.trim().isNotEmpty ? _customerNameController.text.trim() : null,
+                        items: List.from(provider.items),
+                        subtotal: provider.subtotal,
+                        discount: provider.discount,
+                        gst: provider.gstAmount,
+                        grandTotal: provider.grandTotal,
+                        paidAmount: provider.advancePayment,
+                        balanceAmount: provider.balanceDue,
+                        status: InvoiceEntity.determineStatus(provider.grandTotal, provider.advancePayment),
+                        invoiceDate: provider.invoiceDate,
+                        createdAt: DateTime.now(),
+                        updatedAt: DateTime.now(),
+                      );
+                      await invoiceProvider.addInvoice(finalInvoice);
+                   }
     
                     if (!context.mounted) return;
     
@@ -220,13 +241,13 @@ class _BillSuccessScreenState extends State<BillSuccessScreen> {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => InvoicePreviewScreen(
-                          invoice: invoice,
+                          invoice: finalInvoice,
                         ),
                       ),
                     );
                      
                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Invoice Generated & Saved Successfully!')),
+                        SnackBar(content: Text(existingInvoice != null ? 'Invoice Updated Successfully!' : 'Invoice Generated & Saved Successfully!')),
                       );
                 } catch (e) {
                     if (!context.mounted) return;

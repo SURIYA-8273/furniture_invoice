@@ -68,6 +68,42 @@ class InvoiceProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> deleteInvoice(String id) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      await invoiceRepository.deleteInvoice(id);
+      _invoices.removeWhere((inv) => inv.id == id);
+    } catch (e) {
+      _error = 'Failed to delete invoice: $e';
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<int> getNextInvoiceNumber() async {
+    try {
+      return await invoiceRepository.getNextInvoiceNumber();
+    } catch (e) {
+      _error = 'Failed to get next invoice number: $e';
+      notifyListeners();
+      return 1001; // Fallback
+    }
+  }
+
+  Future<InvoiceEntity?> getInvoiceByNumber(String invoiceNumber) async {
+    try {
+      return await invoiceRepository.getInvoiceByNumber(invoiceNumber);
+    } catch (e) {
+      _error = 'Failed to get invoice by number: $e';
+      notifyListeners();
+      return null;
+    }
+  }
+
   Future<void> updateInvoice(InvoiceEntity invoice) async {
     _isLoading = true;
     notifyListeners();

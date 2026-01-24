@@ -66,24 +66,23 @@ class PdfService {
             children: [
               // Header
               _buildHeader(businessProfile, profileImage),
-              pw.SizedBox(height: 20),
+              pw.SizedBox(height: 5),
               pw.Divider(),
-              pw.SizedBox(height: 20),
+              pw.SizedBox(height: 5),
 
               // Invoice Details
               _buildInvoiceDetails(invoice),
-              pw.SizedBox(height: 20),
+              pw.SizedBox(height: 5),
 
               // Items Table
               _buildItemsTable(invoice),
-              pw.SizedBox(height: 20),
+              pw.SizedBox(height: 5),
 
               // Totals
               _buildTotals(invoice),
               pw.Spacer(),
 
-              // Footer
-              _buildFooter(businessProfile),
+              
             ],
           );
         },
@@ -129,64 +128,63 @@ class PdfService {
   }
 
   pw.Widget _buildHeader(BusinessProfileEntity business, pw.MemoryImage? logo) {
-    return pw.Row(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        if (logo != null)
-          pw.Container(
-            width: 60,
-            height: 60,
-            margin: const pw.EdgeInsets.only(right: 20),
-            child: pw.Image(logo),
-          ),
-        pw.Expanded(
-          child: pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Text(
-                business.businessName.toUpperCase(),
-                style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
-              ),
-              if (business.businessAddress != null) ...[
-                pw.SizedBox(height: 5),
-                pw.Text(business.businessAddress!, style: const pw.TextStyle(fontSize: 10)),
-              ],
-              if (business.primaryPhone != null) ...[
-                pw.SizedBox(height: 5),
-                pw.Text('Phone: ${business.primaryPhone}', style: const pw.TextStyle(fontSize: 10)),
-              ],
-              if (business.gstNumber != null) ...[
-                pw.SizedBox(height: 5),
-                pw.Text('GSTIN: ${business.gstNumber}', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
-              ],
-            ],
-          ),
+    return pw.SizedBox(
+      width: double.infinity,
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.center,
+        children: [
+          if (logo != null)
+            pw.Container(
+              width: 80,
+              height: 80,
+              margin: const pw.EdgeInsets.only(bottom: 10),
+              child: pw.Image(logo),
+            ),
+        pw.Text(
+          business.businessName.toUpperCase(),
+          style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
+          textAlign: pw.TextAlign.center,
         ),
+        if (business.primaryPhone != null) ...[
+          pw.SizedBox(height: 5),
+          pw.Text('Phone: ${business.primaryPhone}', style: const pw.TextStyle(fontSize: 10)),
+        ],
+        if (business.businessAddress != null) ...[
+          pw.SizedBox(height: 5),
+          pw.Text(business.businessAddress!, style: const pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+        ],
+       
       ],
+      ),
     );
   }
 
   pw.Widget _buildInvoiceDetails(InvoiceEntity invoice) {
-    return pw.Row(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-      children: [
-        pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Text('Bill Details:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-            pw.SizedBox(height: 5),
-            pw.Text('Invoice: ${invoice.invoiceNumber}', style: pw.TextStyle(fontSize: 14)),
-          ],
-        ),
-        pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.end,
-          children: [
-            pw.Text('Date: ${_formatDate(invoice.invoiceDate)}'),
-            pw.Text('Status: ${invoice.status.toUpperCase()}'),
-          ],
-        ),
-      ],
+    return pw.Container(
+      padding: const pw.EdgeInsets.symmetric(horizontal: 24.0, vertical: 2),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Text(
+            'NAME : ${invoice.customerName ?? '-'}',
+            style: pw.TextStyle(
+              fontWeight: pw.FontWeight.bold,
+              fontSize: 16,
+              color: PdfColors.black,
+            ),
+            textAlign: pw.TextAlign.center,
+          ),
+          pw.Text(
+            'DATE : ${_formatDate(invoice.invoiceDate)}',
+            style: pw.TextStyle(
+              fontWeight: pw.FontWeight.bold,
+              fontSize: 14,
+              color: PdfColors.black,
+            ),
+            textAlign: pw.TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 
@@ -207,11 +205,11 @@ class PdfService {
           decoration: pw.BoxDecoration(color: PdfColors.grey300),
           children: [
             _buildTableCell('DESCRIPTION', isHeader: true),
-            _buildTableCell('LENGTH', isHeader: true),
-            _buildTableCell('QTY', isHeader: true),
-            _buildTableCell('TOT.LEN', isHeader: true),
-            _buildTableCell('RATE', isHeader: true),
-            _buildTableCell('TOTAL', isHeader: true),
+            _buildTableCell('LENGTH', isHeader: true, align: pw.TextAlign.center),
+            _buildTableCell('QTY', isHeader: true, align: pw.TextAlign.center),
+            _buildTableCell('TOT.LEN', isHeader: true, align: pw.TextAlign.center),
+            _buildTableCell('RATE', isHeader: true, align: pw.TextAlign.right),
+            _buildTableCell('TOTAL', isHeader: true, align: pw.TextAlign.right),
           ],
         ),
         // Items
@@ -228,22 +226,23 @@ class PdfService {
                     ],
                   ),
                 ),
-                _buildTableCell(item.squareFeet == 0 ? '-' : item.squareFeet.toStringAsFixed(2)),
-                _buildTableCell(item.quantity == 0 ? '-' : item.quantity.toString()),
-                _buildTableCell(item.totalQuantity == 0 ? '-' : item.totalQuantity.toStringAsFixed(2)),
-                _buildTableCell('₹${item.mrp.toStringAsFixed(2)}'),
-                _buildTableCell('₹${item.totalAmount.toStringAsFixed(2)}'),
+                _buildTableCell(item.squareFeet == 0 ? '-' : item.squareFeet.toStringAsFixed(2), align: pw.TextAlign.center),
+                _buildTableCell(item.quantity == 0 ? '-' : item.quantity.toString(), align: pw.TextAlign.center),
+                _buildTableCell(item.totalQuantity == 0 ? '-' : item.totalQuantity.toStringAsFixed(2), align: pw.TextAlign.center),
+                _buildTableCell('₹${item.mrp.toStringAsFixed(2)}', align: pw.TextAlign.right),
+                _buildTableCell('₹${item.totalAmount.toStringAsFixed(2)}', align: pw.TextAlign.right),
               ],
             )),
       ],
     );
   }
 
-  pw.Widget _buildTableCell(String text, {bool isHeader = false}) {
+  pw.Widget _buildTableCell(String text, {bool isHeader = false, pw.TextAlign align = pw.TextAlign.left}) {
     return pw.Padding(
       padding: const pw.EdgeInsets.all(5),
       child: pw.Text(
         text,
+        textAlign: align,
         style: pw.TextStyle(
           fontWeight: isHeader ? pw.FontWeight.bold : pw.FontWeight.normal,
           fontSize: isHeader ? 10 : 9,
@@ -256,12 +255,7 @@ class PdfService {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.end,
       children: [
-        _buildTotalRow('Subtotal:', '₹${invoice.subtotal.toStringAsFixed(2)}'),
-        if (invoice.discount > 0)
-          _buildTotalRow('Discount:', '-₹${invoice.discount.toStringAsFixed(2)}'),
-        if (invoice.gst > 0)
-          _buildTotalRow('GST:', '₹${invoice.gst.toStringAsFixed(2)}'),
-        pw.Divider(),
+        
         _buildTotalRow('Grand Total:', '₹${invoice.grandTotal.toStringAsFixed(2)}', isBold: true),
         if (invoice.paidAmount > 0)
           _buildTotalRow('Paid:', '₹${invoice.paidAmount.toStringAsFixed(2)}'),
@@ -278,7 +272,7 @@ class PdfService {
         mainAxisAlignment: pw.MainAxisAlignment.end,
         children: [
           pw.Text(label, style: pw.TextStyle(fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal)),
-          pw.SizedBox(width: 20),
+          pw.SizedBox(width: 5),
           pw.Container(
             width: 100,
             child: pw.Text(

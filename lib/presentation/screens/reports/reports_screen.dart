@@ -127,7 +127,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   mainAxisSpacing: ThemeTokens.spacingMd,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  childAspectRatio: 1.5,
+                  childAspectRatio: 1.2,
                   children: [
                     _buildSummaryCard(
                       l10n.totalSales,

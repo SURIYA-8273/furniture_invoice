@@ -47,7 +47,8 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
           .cast<InvoiceModel>()
           .where((model) {
             final numberMatch = model.invoiceNumber.toLowerCase().contains(lowerQuery);
-            return numberMatch;
+            final nameMatch = model.customerName != null && model.customerName!.toLowerCase().contains(lowerQuery);
+            return numberMatch || nameMatch;
           })
           .map((model) => model.toEntity())
           .toList();
@@ -105,6 +106,54 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
       return invoices;
     } catch (e) {
       throw Exception('Failed to get unpaid invoices: $e');
+    }
+  }
+
+  @override
+  Future<int> getNextInvoiceNumber() async {
+    try {
+      // Retrieve all invoices
+      final invoices = _box.values.cast<InvoiceModel>();
+
+      if (invoices.isEmpty) {
+        return 1001; // Start from 1001
+      }
+
+      int maxNumber = 1000;
+
+      for (var model in invoices) {
+        // Assume format is PREFIX-NUMBER or just NUMBER 
+        // We will try to extract the last sequence of digits
+        final numberPart = model.invoiceNumber.split('-').last;
+        final number = int.tryParse(numberPart);
+        
+        if (number != null) {
+          if (number > maxNumber) {
+            maxNumber = number;
+          }
+        }
+      }
+
+      return maxNumber + 1;
+    } catch (e) {
+      // If error, fallback safe
+      return 1001;
+    }
+  }
+
+  @override
+  Future<InvoiceEntity?> getInvoiceByNumber(String invoiceNumber) async {
+    try {
+      final invoices = _box.values.cast<InvoiceModel>();
+      try {
+        final match = invoices.firstWhere(
+            (model) => model.invoiceNumber == invoiceNumber);
+        return match.toEntity();
+      } catch (e) {
+        return null; // Not found
+      }
+    } catch (e) {
+      throw Exception('Failed to get invoice by number: $e');
     }
   }
 }

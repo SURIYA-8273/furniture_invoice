@@ -51,10 +51,7 @@ class _BillPaymentsScreenState extends State<BillPaymentsScreen> with SingleTick
         elevation: 0,
         // backgroundColor: Colors.white, // Inherit Blue
         // foregroundColor: Colors.black, // Inherit White
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 20, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
+       
       ),
       body: Column(
         children: [
@@ -181,18 +178,7 @@ class _BillPaymentsScreenState extends State<BillPaymentsScreen> with SingleTick
                   provider.loadInvoices();
                 },
               ),
-              _buildBottomActionButton(
-                context,
-                icon: Icons.history,
-                label: 'HISTORY',
-                color: theme.primaryColor,
-                isPrimary: false,
-                onTap: () {
-                  // Navigate to History or maybe just focus on Paid tab?
-                  // For now, let's switch to Paid tab
-                  _tabController.animateTo(1);
-                },
-              ),
+            
             ],
           ),
         ),
@@ -234,6 +220,8 @@ class _BillPaymentsScreenState extends State<BillPaymentsScreen> with SingleTick
             );
             provider.loadInvoices();
           },
+
+          onDelete: () => _showDeleteConfirmationDialog(context, invoice),
         );
       },
     );
@@ -277,5 +265,52 @@ class _BillPaymentsScreenState extends State<BillPaymentsScreen> with SingleTick
         ],
       ),
     );
+  }
+
+
+  Future<void> _showDeleteConfirmationDialog(BuildContext context, InvoiceEntity invoice) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Bill'),
+        content: Text('Are you sure you want to delete Bill #${invoice.invoiceNumber}? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('CANCEL'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('DELETE'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      try {
+        final provider = context.read<InvoiceProvider>();
+        await provider.deleteInvoice(invoice.id);
+        
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Bill deleted successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to delete bill: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
   }
 }
