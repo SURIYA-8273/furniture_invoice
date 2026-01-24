@@ -157,7 +157,7 @@ class PdfService {
               ],
               if (business.gstNumber != null) ...[
                 pw.SizedBox(height: 5),
-                pw.Text('GSTIN: ${business.gstNumber}', style: const pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+                pw.Text('GSTIN: ${business.gstNumber}', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
               ],
             ],
           ),

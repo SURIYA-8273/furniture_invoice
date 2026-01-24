@@ -8,6 +8,7 @@ import '../../providers/invoice_provider.dart';
 import '../../providers/payment_history_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
+import '../../../../core/utils/calculation_utils.dart';
 
 class EditBillPaymentScreen extends StatefulWidget {
   final InvoiceEntity invoice;
@@ -105,9 +106,12 @@ class _EditBillPaymentScreenState extends State<EditBillPaymentScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Edit Bill & Payment'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        title: const Text('Edit Bill & Payment', style: TextStyle(fontWeight: FontWeight.bold)),
+        // Remove local overrides to inherit AppTheme (Blue) except for specific foreground needs if theme is not set perfectly everywhere yet.
+        // Assuming AppTheme sets AppBar color to blue. If not, I'll set it here to match other screens.
+        // The user specifically asked for "add a app bar blue theme"
+        backgroundColor: Colors.blue, 
+        foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -115,49 +119,50 @@ class _EditBillPaymentScreenState extends State<EditBillPaymentScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.save, color: ThemeTokens.primaryColor),
-            onPressed: _handleSave,
-          ),
+         
         ],
       ),
       body: Column(
         children: [
           Expanded(
             child: SingleChildScrollView(
+              padding: const EdgeInsets.only(bottom: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildItemsTable(),
-                  // Action buttons removed as per request
                   const Divider(height: 1),
                   _buildSummarySection(currencyFormat),
                 ],
               ),
             ),
           ),
-          _buildFooterButton(),
         ],
       ),
+      bottomNavigationBar: _buildFooterButton(),
     );
   }
 
   Widget _buildItemsTable() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.grey.shade300),
+        // borderRadius: BorderRadius.circular(8), // Optional rounded corners
+      ),
       child: Table(
         columnWidths: const {
-          0: FixedColumnWidth(30),
-          1: FlexColumnWidth(4),
-          2: FlexColumnWidth(1.5),
-          3: FlexColumnWidth(1),
-          4: FlexColumnWidth(1.5),
-          5: FlexColumnWidth(1.5),
-          6: FlexColumnWidth(2),
+          0: FlexColumnWidth(3), // Description
+          1: FlexColumnWidth(1), // Length
+          2: FlexColumnWidth(1), // Qty
+          3: FlexColumnWidth(1.2), // Rate
+          4: FlexColumnWidth(1.2), // Total Len
+          5: FlexColumnWidth(1.5), // Total
         },
         border: TableBorder(
-          horizontalInside: BorderSide(color: Colors.grey[200]!),
-          verticalInside: BorderSide(color: Colors.grey[200]!, width: 0.5),
+          horizontalInside: BorderSide(color: Colors.grey.shade200),
+          verticalInside: BorderSide(color: Colors.grey.shade200),
         ),
         children: [
           _buildTableHeader(),
@@ -168,48 +173,77 @@ class _EditBillPaymentScreenState extends State<EditBillPaymentScreen> {
   }
 
   TableRow _buildTableHeader() {
-    const headerStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 10, color: Colors.black);
-    return const TableRow(
+    return TableRow(
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100, // Light grey header background
+        border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
+      ),
       children: [
-    
-        TableCell(child: Center(child: Text('DESCRIPTION (H X W)', style: headerStyle))),
-        TableCell(child: Center(child: Text('L', style: headerStyle))),
-        TableCell(child: Center(child: Text('QTY', style: headerStyle))),
-        TableCell(child: Center(child: Text('RATE', style: headerStyle))),
-        TableCell(child: Center(child: Text('TOTAL L', style: headerStyle))),
-        TableCell(child: Center(child: Text('TOTAL', style: headerStyle))),
+        _buildHeaderCell('DESCRIPTION'),
+        _buildHeaderCell('LEN'),
+        _buildHeaderCell('QTY'),
+        _buildHeaderCell('RATE'),
+        _buildHeaderCell('TOT.LEN'),
+        _buildHeaderCell('TOTAL'),
       ],
     );
   }
 
+  Widget _buildHeaderCell(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+      child: Center(
+        child: Text(
+          text,
+          style: TextStyle(
+             fontWeight: FontWeight.bold, // Bolder
+             fontSize: 10,
+             color: Colors.grey.shade800,
+             letterSpacing: 0.5,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
   TableRow _buildTableRow(InvoiceItemEntity item) {
-    const cellStyle = TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w500);
+    const cellStyle = TextStyle(fontSize: 11, color: Colors.black87, fontWeight: FontWeight.w500);
+    
+    // Helper for cells
+    Widget buildCell(String text, {double top = 12, double bottom = 12}) => TableCell(
+      verticalAlignment: TableCellVerticalAlignment.middle,
+      child: Padding(
+        padding: EdgeInsets.only(top: top, bottom: bottom, left: 4, right: 4),
+        child: Center(child: Text(text, style: cellStyle, textAlign: TextAlign.center)),
+      ),
+    );
+
     return TableRow(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+      ),
       children: [
-        
         TableCell(
-          child: Container(
-            height: 40,
-            alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.only(left: 4),
-            child: Text(item.productName, style: cellStyle),
+          verticalAlignment: TableCellVerticalAlignment.middle,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 8, top: 12, bottom: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(item.productName, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                if (item.size.isNotEmpty)
+                  Text(item.size, style: TextStyle(fontSize: 9, color: Colors.grey[600])),
+              ],
+            ),
           ),
         ),
-        TableCell(
-          child: Center(child: Text(item.squareFeet.toStringAsFixed(1), style: cellStyle)),
-        ),
-        TableCell(
-          child: Center(child: Text(item.quantity.toString(), style: cellStyle)),
-        ),
-        TableCell(
-          child: Center(child: Text(item.mrp.toStringAsFixed(2), style: cellStyle)),
-        ),
-        TableCell(
-          child: Center(child: Text(item.totalQuantity.toStringAsFixed(1), style: cellStyle)),
-        ),
-        TableCell(
-          child: Center(child: Text(item.totalAmount.toStringAsFixed(2), style: cellStyle)),
-        ),
+        buildCell(item.squareFeet == 0 ? '-' : item.squareFeet.toStringAsFixed(1)),
+        buildCell(item.quantity == 0 ? '-' : item.quantity.toString()),
+        buildCell('₹${item.mrp.toStringAsFixed(0)}'), // Removed decimal for rate to save space if needed, or keep .00
+        buildCell(item.totalQuantity == 0 ? '-' : item.totalQuantity.toStringAsFixed(1)),
+        buildCell(CalculationUtils.formatCurrency(item.totalAmount).replaceAll('₹', '')),
       ],
     );
   }
@@ -225,15 +259,13 @@ class _EditBillPaymentScreenState extends State<EditBillPaymentScreen> {
           const SizedBox(height: 4),
           _buildSummaryRow('PAID AMOUNT', currencyFormat.format(_currentInvoice.paidAmount), color: Colors.green[800], isBold: true, fontSize: 16),
           const SizedBox(height: 4),
-                    _buildSummaryRow('REMAINING BALANCE', 
-            currencyFormat.format(_currentInvoice.balanceAmount - (double.tryParse(_paymentController.text) ?? 0)), 
+          _buildSummaryRow('REMAINING BALANCE', 
+            currencyFormat.format(_currentInvoice.balanceAmount), 
             color: Colors.red[400], isBold: true, fontSize: 16),
              const SizedBox(height: 12),
           _buildPaymentHistory(),
           const SizedBox(height: 20),
-          _buildNewPaymentInput(currencyFormat),
-         
-
+          // New Payment Input removed as per request
           
         ],
       ),
@@ -328,42 +360,42 @@ class _EditBillPaymentScreenState extends State<EditBillPaymentScreen> {
     );
   }
 
-  Widget _buildNewPaymentInput(NumberFormat currencyFormat) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF3F9FF),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE1F0FF)),
-      ),
-      child: Column(
-        children: [
-          const Text('ENTER NEW PAYMENT', style: TextStyle(color: ThemeTokens.primaryColor, fontSize: 10, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Text('\$', style: TextStyle(color: ThemeTokens.primaryColor, fontSize: 24, fontWeight: FontWeight.bold)),
-              const SizedBox(width: 8),
-              Expanded(
-                child: TextField(
-                  controller: _paymentController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: ThemeTokens.primaryColor, fontSize: 40, fontWeight: FontWeight.bold),
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                  onChanged: (val) {
-                    setState(() {}); // Trigger rebuild to update Remaining Balance
-                  },
-                ),
-              ),
-            ],
+
+
+  void _showPaymentDialog(BuildContext context) {
+    _paymentController.clear(); // Clear previous value
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Enter Payment Amount', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: TextField(
+          controller: _paymentController,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          autofocus: true,
+          decoration: InputDecoration(
+            prefixText: '₹ ',
+            hintText: '0.00',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            filled: true,
+            fillColor: Colors.grey[50],
+          ),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('CANCEL', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+               _handleSave(); // Proceed with save using the controller value
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ThemeTokens.primaryColor,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('SAVE', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
           ),
         ],
       ),
@@ -402,17 +434,28 @@ class _EditBillPaymentScreenState extends State<EditBillPaymentScreen> {
 
   Widget _buildFooterButton() {
     return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
       padding: const EdgeInsets.all(16),
-      color: Colors.white,
-      child: ElevatedButton(
-        onPressed: _handleSave,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: ThemeTokens.primaryColor,
-          minimumSize: const Size(double.infinity, 55),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          elevation: 2,
+      child: SafeArea(
+        child: ElevatedButton(
+          onPressed: () => _showPaymentDialog(context),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: ThemeTokens.primaryColor,
+            minimumSize: const Size(double.infinity, 55),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            elevation: 2,
+          ),
+          child: const Text('Update Payment', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
         ),
-        child: const Text('Update Payment & Save', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
       ),
     );
   }
