@@ -176,8 +176,18 @@ class BillingCalculationProvider extends ChangeNotifier {
     // If user passed a new quantity but not totalQuantity (weird case for direct), we might assume they mean totalQuantity?
     // But for direct items, 'quantity' (pieces) is usually unused/irrelevant or 1.
     
-    final newTotalAmount = totalAmount ??
-        InvoiceItemEntity.calculateTotalAmount(newMrp, newTotalQuantity);
+    // Determine effective multiplier for Total Amount calculation
+    double multiplier = newTotalQuantity;
+    if (multiplier <= 0.001) {
+      if (newQuantity > 0) {
+        multiplier = newQuantity.toDouble();
+      } else {
+        // If both Total Length and Qty are 0, implies 1 unit if Rate is entered (unless Rate is also 0)
+         multiplier = 1.0;
+      }
+    }
+
+    final newTotalAmount = totalAmount ?? (newMrp * multiplier);
 
     _items[index] = item.copyWith(
       productName: productName,

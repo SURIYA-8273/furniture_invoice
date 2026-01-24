@@ -49,10 +49,10 @@ class _BillPaymentsScreenState extends State<BillPaymentsScreen> with SingleTick
         ),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        // backgroundColor: Colors.white, // Inherit Blue
+        // foregroundColor: Colors.black, // Inherit White
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+          icon: const Icon(Icons.arrow_back_ios_new, size: 20, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -185,7 +185,7 @@ class _BillPaymentsScreenState extends State<BillPaymentsScreen> with SingleTick
                 context,
                 icon: Icons.history,
                 label: 'HISTORY',
-                color: Colors.grey[700]!,
+                color: theme.primaryColor,
                 isPrimary: false,
                 onTap: () {
                   // Navigate to History or maybe just focus on Paid tab?

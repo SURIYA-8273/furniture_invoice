@@ -199,10 +199,9 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                     fit: BoxFit.cover,
                                   ),
                                 )
-                              : Icon(
-                                  Icons.business,
-                                  size: ThemeTokens.iconSizeXLarge,
-                                  color: theme.colorScheme.primary,
+                              : Image.asset(
+                                  'assets/images/logo.png',
+                                  fit: BoxFit.cover,
                                 ),
                         ),
                       ),

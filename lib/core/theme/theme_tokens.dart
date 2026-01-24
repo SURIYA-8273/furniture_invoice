@@ -12,7 +12,7 @@ class ThemeTokens {
   // ============================================================
   
   /// Primary brand color - used for main actions and highlights
-  static const Color primaryColor = Color(0xFF1976D2); // Blue
+  static const Color primaryColor = Colors.blue; // 0xFF2196F3
   
   /// Primary color variant for hover/pressed states
   static const Color primaryColorDark = Color(0xFF1565C0);

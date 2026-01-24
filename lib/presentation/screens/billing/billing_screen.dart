@@ -108,7 +108,7 @@ class _BillingScreenState extends State<BillingScreen> {
         centerTitle: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.straighten, color: Colors.black),
+            icon: const Icon(Icons.add, color: Colors.black),
             tooltip: 'Add Measurement',
             onPressed: () => _addItem(),
           ),
@@ -173,7 +173,7 @@ class _BillingScreenState extends State<BillingScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 4),
   
                     // 2. Paid Amount & Balance Due Row
                     Row(
@@ -181,10 +181,10 @@ class _BillingScreenState extends State<BillingScreen> {
                         // Paid Amount Box
                         Expanded(
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
                               border: Border.all(color: Colors.grey.shade300),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(4),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -228,11 +228,11 @@ class _BillingScreenState extends State<BillingScreen> {
                         // Balance Due Box
                         Expanded(
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
                               color: Colors.red.shade50, // Pinkish tint as in image
                               border: Border.all(color: Colors.red.shade100),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(4),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -260,35 +260,24 @@ class _BillingScreenState extends State<BillingScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
-  
-                    // 3. Status Buttons
-                    Row(
-                      children: [
-                        _buildStatusButton('PAID', provider.paymentStatus == 'Paid'),
-                        const SizedBox(width: 12),
-                        _buildStatusButton('PARTIAL', provider.paymentStatus == 'Partially Paid'),
-                        const SizedBox(width: 12),
-                        _buildStatusButton('PENDING', provider.paymentStatus == 'Unpaid'),
-                      ],
-                    ),
-                    const SizedBox(height: 30),
+              
+                    const SizedBox(height: 10),
   
                     // 4. Save Button
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         onPressed: _saveBilling,
-                        icon: const Icon(Icons.receipt_long, size: 24),
+                        icon: const Icon(Icons.receipt_long, size: 16),
                         label: const Text('SAVE BILLING'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
+                          // backgroundColor: Colors.black, // Inherit blue
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                           elevation: 8,
                           shadowColor: Colors.black45,
-                          textStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18, letterSpacing: 1.0),
+                          textStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 1.0),
                         ),
                       ),
                     ),
@@ -307,14 +296,14 @@ class _BillingScreenState extends State<BillingScreen> {
       child: InkWell(
         onTap: () => _setPaymentStatus(label),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 14),
+          padding: const EdgeInsets.symmetric(vertical: 7),
           decoration: BoxDecoration(
             color: isSelected ? Colors.blue.shade50 : Colors.white,
             border: Border.all(
               color: isSelected ? Colors.blue : Colors.grey.shade300,
               width: isSelected ? 2 : 1,
             ),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(4),
           ),
           child: Center(
             child: Text(
@@ -322,7 +311,7 @@ class _BillingScreenState extends State<BillingScreen> {
               style: TextStyle(
                 color: isSelected ? Colors.blue.shade700 : Colors.black,
                 fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
-                fontSize: 12,
+                fontSize: 10,
               ),
             ),
           ),
@@ -507,8 +496,9 @@ class _EditableBillingRowState extends State<_EditableBillingRow> {
     }
     
     _updateNumericController(_sqFtController, widget.item.squareFeet);
-    if (_qtyController.text != widget.item.quantity.toString()) {
-       _qtyController.text = widget.item.quantity.toString();
+    final newQtyStr = widget.item.quantity == 0 ? '' : widget.item.quantity.toString();
+    if (_qtyController.text != newQtyStr) {
+       _qtyController.text = newQtyStr;
     }
     _updateNumericController(_totQtyController, widget.item.totalQuantity);
     _updateNumericController(_rateController, widget.item.mrp);
@@ -577,17 +567,28 @@ class _EditableBillingRowState extends State<_EditableBillingRow> {
                 decoration: BoxDecoration(
                   border: Border(right: BorderSide(color: Colors.grey.shade300)),
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     TextField(
                       controller: _nameController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         isDense: true,
-                        contentPadding: EdgeInsets.zero,
-                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(4),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(4),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(4),
+                          borderSide: const BorderSide(color: Colors.black, width: 1),
+                        ),
                         hintText: 'Item Name',
                       ),
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
@@ -599,32 +600,52 @@ class _EditableBillingRowState extends State<_EditableBillingRow> {
                       // Split Size Inputs
                       Row(
                         children: [
-                          SizedBox(
-                            width: 40,
+                          Expanded(
                             child: TextField(
                               controller: _widthController,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 isDense: true,
-                                contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 2),
-                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 2, vertical: 3),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                  borderSide: BorderSide(color: Colors.grey.shade300),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                  borderSide: BorderSide(color: Colors.grey.shade300),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                  borderSide: const BorderSide(color: Colors.black, width: 1),
+                                ),
                                 hintText: 'W',
-                                hintStyle: TextStyle(fontSize: 10, color: Colors.grey),
+                                hintStyle: const TextStyle(fontSize: 10, color: Colors.grey),
                               ),
                               style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: Colors.grey),
                                onChanged: (_) => _onSizeChanged(),
                             ),
                           ),
                           const Text(' x ', style: TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.bold)),
-                          SizedBox(
-                            width: 40,
+                          Expanded(
                             child: TextField(
                               controller: _heightController,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 isDense: true,
-                                contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 2),
-                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 2, vertical: 3),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                  borderSide: BorderSide(color: Colors.grey.shade300),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                  borderSide: BorderSide(color: Colors.grey.shade300),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                  borderSide: const BorderSide(color: Colors.black, width: 1),
+                                ),
                                 hintText: 'H',
-                                hintStyle: TextStyle(fontSize: 10, color: Colors.grey),
+                                hintStyle: const TextStyle(fontSize: 10, color: Colors.grey),
                               ),
                               style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: Colors.grey),
                               onChanged: (_) => _onSizeChanged(),
@@ -744,25 +765,39 @@ class _EditableBillingRowState extends State<_EditableBillingRow> {
     bool enabled = true,
     String? hintText,
   }) {
-    return TextField(
-      controller: controller,
-      textAlign: TextAlign.center,
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      maxLines: null, // Allow wrapping
-      decoration: InputDecoration(
-        isDense: true,
-        border: InputBorder.none,
-        contentPadding: const EdgeInsets.symmetric(vertical: 12),
-        hintText: hintText,
-        hintStyle: TextStyle(color: Colors.grey[400]),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+      child: TextField(
+        controller: controller,
+        textAlign: TextAlign.center,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        maxLines: null, // Allow wrapping
+        decoration: InputDecoration(
+          isDense: true,
+          contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(4),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          enabledBorder: OutlineInputBorder(
+             borderRadius: BorderRadius.circular(4),
+             borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          focusedBorder: OutlineInputBorder(
+             borderRadius: BorderRadius.circular(4),
+             borderSide: const BorderSide(color: Colors.blue, width: 2), // Focus color matching image
+          ),
+          hintText: hintText,
+          hintStyle: TextStyle(color: Colors.grey[400]),
+        ),
+        style: TextStyle(
+          fontWeight: FontWeight.bold, 
+          fontSize: 13,
+          color: enabled ? Colors.black : Colors.grey,
+        ),
+        onChanged: onChanged,
+        enabled: enabled,
       ),
-      style: TextStyle(
-        fontWeight: FontWeight.bold, 
-        fontSize: 13,
-        color: enabled ? Colors.black : Colors.grey,
-      ),
-      onChanged: onChanged,
-      enabled: enabled,
     );
   }
   

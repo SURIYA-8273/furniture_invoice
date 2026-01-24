@@ -5,6 +5,7 @@ import 'invoice_item_entity.dart';
 class InvoiceEntity {
   final String id;
   final String invoiceNumber; // INV-000001
+  final String? customerName;
   final List<InvoiceItemEntity> items;
   final double subtotal; // Sum of all item amounts
   final double discount; // Discount amount
@@ -20,6 +21,7 @@ class InvoiceEntity {
   InvoiceEntity({
     required this.id,
     required this.invoiceNumber,
+    this.customerName,
     required this.items,
     required this.subtotal,
     this.discount = 0.0,
@@ -65,6 +67,7 @@ class InvoiceEntity {
   InvoiceEntity copyWith({
     String? id,
     String? invoiceNumber,
+    String? customerName,
     List<InvoiceItemEntity>? items,
     double? subtotal,
     double? discount,
@@ -80,6 +83,7 @@ class InvoiceEntity {
     return InvoiceEntity(
       id: id ?? this.id,
       invoiceNumber: invoiceNumber ?? this.invoiceNumber,
+      customerName: customerName ?? this.customerName,
       items: items ?? this.items,
       subtotal: subtotal ?? this.subtotal,
       discount: discount ?? this.discount,
