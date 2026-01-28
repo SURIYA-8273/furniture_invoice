@@ -8,6 +8,7 @@ import '../../data/models/invoice_model.dart';
 import '../../data/models/invoice_item_model.dart';
 import '../../data/models/payment_model.dart';
 import '../../data/models/payment_history_model.dart';
+import '../../data/models/description_model.dart';
 
 /// Service for initializing and managing Hive database.
 /// Handles encryption, box initialization, and cleanup.
@@ -39,6 +40,7 @@ class HiveService {
       Hive.registerAdapter(InvoiceModelAdapter()); // typeId: 4
       Hive.registerAdapter(InvoiceItemModelAdapter()); // typeId: 5
       Hive.registerAdapter(PaymentModelAdapter()); // typeId: 6
+      Hive.registerAdapter(DescriptionModelAdapter()); // typeId: 10
       
       debugPrint('Hive initialized successfully with all adapters');
       _isInitialized = true;
@@ -63,27 +65,27 @@ class HiveService {
       // Open business data boxes (encrypted)
       final encryptionKey = _generateEncryptionKey();
       
-      await Hive.openBox(
+      await Hive.openBox<BusinessProfileModel>(
         HiveBoxNames.businessProfile,
         encryptionCipher: HiveAesCipher(encryptionKey),
       );
       
-      await Hive.openBox(
+      await Hive.openBox<ProductModel>(
         HiveBoxNames.products,
         encryptionCipher: HiveAesCipher(encryptionKey),
       );
       
-      await Hive.openBox(
+      await Hive.openBox<InvoiceModel>(
         HiveBoxNames.invoices,
         encryptionCipher: HiveAesCipher(encryptionKey),
       );
       
-      await Hive.openBox(
+      await Hive.openBox<InvoiceItemModel>(
         HiveBoxNames.invoiceItems,
         encryptionCipher: HiveAesCipher(encryptionKey),
       );
       
-      await Hive.openBox(
+      await Hive.openBox<PaymentModel>(
         HiveBoxNames.payments,
         encryptionCipher: HiveAesCipher(encryptionKey),
       );
@@ -96,6 +98,11 @@ class HiveService {
       await Hive.openBox(
         HiveBoxNames.balanceHistory,
         encryptionCipher: HiveAesCipher(encryptionKey),
+      );
+
+      await Hive.openBox<DescriptionModel>(
+        HiveBoxNames.descriptions,
+         encryptionCipher: HiveAesCipher(encryptionKey),
       );
       
       debugPrint('All Hive boxes opened successfully');
@@ -137,11 +144,11 @@ class HiveService {
   }
   
   /// Get a specific box
-  Box getBox(String boxName) {
+  Box<T> getBox<T>(String boxName) {
     if (!Hive.isBoxOpen(boxName)) {
       throw Exception('Box $boxName is not open');
     }
-    return Hive.box(boxName);
+    return Hive.box<T>(boxName);
   }
   
   /// Check if a box is open

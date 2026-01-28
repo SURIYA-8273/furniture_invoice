@@ -27,6 +27,8 @@ class BusinessProfileModelAdapter extends TypeAdapter<BusinessProfileModel> {
       websiteUrl: fields[7] as String?,
       gstNumber: fields[8] as String?,
       businessAddress: fields[9] as String?,
+      businessNameTamil: fields[12] as String?,
+      businessAddressTamil: fields[13] as String?,
       createdAt: fields[10] as DateTime,
       updatedAt: fields[11] as DateTime,
     );
@@ -35,7 +37,7 @@ class BusinessProfileModelAdapter extends TypeAdapter<BusinessProfileModel> {
   @override
   void write(BinaryWriter writer, BusinessProfileModel obj) {
     writer
-      ..writeByte(12)
+      ..writeByte(14)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -56,6 +58,10 @@ class BusinessProfileModelAdapter extends TypeAdapter<BusinessProfileModel> {
       ..write(obj.gstNumber)
       ..writeByte(9)
       ..write(obj.businessAddress)
+      ..writeByte(12)
+      ..write(obj.businessNameTamil)
+      ..writeByte(13)
+      ..write(obj.businessAddressTamil)
       ..writeByte(10)
       ..write(obj.createdAt)
       ..writeByte(11)

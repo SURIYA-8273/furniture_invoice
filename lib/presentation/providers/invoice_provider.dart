@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/invoice_entity.dart';
 import '../../domain/repositories/invoice_repository.dart';
+import '../../core/services/supabase_service.dart';
 
 class InvoiceProvider extends ChangeNotifier {
   final InvoiceRepository invoiceRepository;
@@ -28,6 +29,7 @@ class InvoiceProvider extends ChangeNotifier {
 
     try {
       _invoices = await invoiceRepository.getAllInvoices();
+      _invoices.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     } catch (e) {
       _error = 'Failed to load invoices: $e';
     } finally {
@@ -43,6 +45,7 @@ class InvoiceProvider extends ChangeNotifier {
 
     try {
       _invoices = await invoiceRepository.searchInvoices(query);
+      _invoices.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     } catch (e) {
       _error = 'Failed to search invoices: $e';
     } finally {
@@ -58,9 +61,13 @@ class InvoiceProvider extends ChangeNotifier {
     try {
       await invoiceRepository.addInvoice(invoice);
       _invoices.insert(0, invoice);
-      _invoices.sort((a, b) => b.invoiceDate.compareTo(a.invoiceDate));
+      _invoices.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      
+      // Real-time backup trigger - DISABLED as per request (store local only)
+      // BackupService.instance.syncInvoice(invoice);
     } catch (e) {
-      _error = 'Failed to add invoice: $e';
+      // Don't set _error here as it might be used by UI components to show a full-screen error
+      // _error = 'Failed to add invoice: $e';
       rethrow;
     } finally {
       _isLoading = false;
@@ -68,21 +75,39 @@ class InvoiceProvider extends ChangeNotifier {
     }
   }
 
+  String? _deletingInvoiceId;
+  String? get deletingInvoiceId => _deletingInvoiceId;
+
   Future<void> deleteInvoice(String id) async {
-    _isLoading = true;
+    _deletingInvoiceId = id;
     notifyListeners();
 
     try {
+      // 1. Check Connectivity
+      final isConnected = await SupabaseService.instance.isConnected();
+      if (!isConnected) {
+        throw Exception('Cannot delete bill while offline. Please check internet connection.');
+      }
+
+      // 2. Delete from Cloud
+      await SupabaseService.instance.deleteBill(id);
+      
+      // 2.5 Record Deletion in Tombstone Table (for sync)
+      await SupabaseService.instance.recordDeletion(id);
+
+      // 3. Delete Locally (only if cloud delete succeeds)
       await invoiceRepository.deleteInvoice(id);
       _invoices.removeWhere((inv) => inv.id == id);
     } catch (e) {
-      _error = 'Failed to delete invoice: $e';
+      // Don't set _error here as it replaces the entire list view with an error message.
+      // The UI catches this exception and shows a Snackbar/Dialog.
       rethrow;
     } finally {
-      _isLoading = false;
+      _deletingInvoiceId = null;
       notifyListeners();
     }
   }
+
 
   Future<int> getNextInvoiceNumber() async {
     try {
@@ -114,8 +139,13 @@ class InvoiceProvider extends ChangeNotifier {
       if (index != -1) {
         _invoices[index] = invoice;
       }
+      _invoices.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      
+      // Real-time backup trigger - DISABLED as per request (store local only)
+      // BackupService.instance.syncInvoice(invoice);
     } catch (e) {
-      _error = 'Failed to update invoice: $e';
+      // Don't set _error here
+      // _error = 'Failed to update invoice: $e';
       rethrow;
     } finally {
       _isLoading = false;

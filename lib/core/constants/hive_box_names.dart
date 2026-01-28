@@ -17,6 +17,7 @@ class HiveBoxNames {
   static const String payments = 'payments';
   static const String paymentHistory = 'payment_history';
   static const String balanceHistory = 'balance_history';
+  static const String descriptions = 'descriptions';
 }
 
 /// Hive type IDs for adapters.
@@ -27,8 +28,10 @@ class HiveTypeIds {
   static const int businessProfile = 0;
   static const int customer = 1;
   static const int product = 2;
-  static const int invoice = 3;
-  static const int invoiceItem = 4;
-  static const int payment = 5;
-  static const int balanceHistory = 6;
+  static const int paymentHistory = 3;
+  static const int invoice = 4;
+  static const int invoiceItem = 5;
+  static const int payment = 6;
+  static const int balanceHistory = 7;
+  static const int description = 10;
 }

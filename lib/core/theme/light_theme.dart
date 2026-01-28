@@ -186,6 +186,14 @@ class LightTheme {
           borderRadius: BorderRadius.circular(ThemeTokens.radiusLarge),
         ),
       ),
+
+      // SnackBar Theme
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.grey[900],
+        contentTextStyle: const TextStyle(color: Colors.white),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
       
       // Divider Theme
       dividerTheme: DividerThemeData(

@@ -104,6 +104,12 @@ abstract class AppLocalizations {
   /// **'Furniture Billing'**
   String get appName;
 
+  /// No description provided for @appSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Production-Ready Billing Software'**
+  String get appSubtitle;
+
   /// No description provided for @home.
   ///
   /// In en, this message translates to:
@@ -133,6 +139,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Customer Name'**
   String get customerName;
+
+  /// No description provided for @enterCustomerName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter customer name'**
+  String get enterCustomerName;
 
   /// No description provided for @phoneNumber.
   ///
@@ -314,6 +326,12 @@ abstract class AppLocalizations {
   /// **'Customer List'**
   String get customerList;
 
+  /// No description provided for @itemName.
+  ///
+  /// In en, this message translates to:
+  /// **'Item Name'**
+  String get itemName;
+
   /// No description provided for @productName.
   ///
   /// In en, this message translates to:
@@ -392,6 +410,54 @@ abstract class AppLocalizations {
   /// **'Description'**
   String get description;
 
+  /// No description provided for @descriptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Descriptions'**
+  String get descriptions;
+
+  /// No description provided for @manageDescriptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Descriptions'**
+  String get manageDescriptions;
+
+  /// No description provided for @addDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Description'**
+  String get addDescription;
+
+  /// No description provided for @editDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Description'**
+  String get editDescription;
+
+  /// No description provided for @deleteDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Description'**
+  String get deleteDescription;
+
+  /// No description provided for @noDescriptionsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No descriptions added yet'**
+  String get noDescriptionsYet;
+
+  /// No description provided for @enterDescriptionText.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter description text'**
+  String get enterDescriptionText;
+
+  /// No description provided for @deleteDescriptionConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{text}\"?'**
+  String deleteDescriptionConfirmation(String text);
+
   /// No description provided for @category.
   ///
   /// In en, this message translates to:
@@ -434,11 +500,11 @@ abstract class AppLocalizations {
   /// **'Product name is required'**
   String get productNameRequired;
 
-  /// No description provided for @mrpRequired.
+  /// No description provided for @rateRequired.
   ///
   /// In en, this message translates to:
-  /// **'MRP is required'**
-  String get mrpRequired;
+  /// **'Rate is required'**
+  String get rateRequired;
 
   /// No description provided for @invalidMRP.
   ///
@@ -530,23 +596,23 @@ abstract class AppLocalizations {
   /// **'Quantity'**
   String get quantity;
 
-  /// No description provided for @squareFeet.
+  /// No description provided for @length.
   ///
   /// In en, this message translates to:
-  /// **'Square Feet'**
-  String get squareFeet;
+  /// **'LEN'**
+  String get length;
 
-  /// No description provided for @totalQuantity.
+  /// No description provided for @totalLength.
   ///
   /// In en, this message translates to:
-  /// **'Total Quantity'**
-  String get totalQuantity;
+  /// **'Total Length'**
+  String get totalLength;
 
-  /// No description provided for @mrp.
+  /// No description provided for @rate.
   ///
   /// In en, this message translates to:
-  /// **'MRP'**
-  String get mrp;
+  /// **'RATE'**
+  String get rate;
 
   /// No description provided for @amount.
   ///
@@ -590,6 +656,198 @@ abstract class AppLocalizations {
   /// **'Balance Amount'**
   String get balanceAmount;
 
+  /// No description provided for @remainingBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'REMAINING BALANCE'**
+  String get remainingBalance;
+
+  /// No description provided for @editBillAndPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Bill & Payment'**
+  String get editBillAndPayment;
+
+  /// No description provided for @paymentHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment History'**
+  String get paymentHistory;
+
+  /// No description provided for @noPreviousPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'No previous payments'**
+  String get noPreviousPayments;
+
+  /// No description provided for @enterPaymentAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Payment Amount'**
+  String get enterPaymentAmount;
+
+  /// No description provided for @updatePayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Payment'**
+  String get updatePayment;
+
+  /// No description provided for @paymentUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment updated and saved successfully!'**
+  String get paymentUpdatedSuccessfully;
+
+  /// No description provided for @shareInvoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Invoice'**
+  String get shareInvoice;
+
+  /// No description provided for @whatsappNumberOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp Number (Optional)'**
+  String get whatsappNumberOptional;
+
+  /// No description provided for @send.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get send;
+
+  /// No description provided for @businessProfileMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Business Profile Missing'**
+  String get businessProfileMissing;
+
+  /// No description provided for @businessProfileSetupMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please set up your business profile (Name, Address, Logo) in Settings before generating invoices.'**
+  String get businessProfileSetupMessage;
+
+  /// No description provided for @businessNameTamil.
+  ///
+  /// In en, this message translates to:
+  /// **'Business Name (Tamil)'**
+  String get businessNameTamil;
+
+  /// No description provided for @businessAddressTamil.
+  ///
+  /// In en, this message translates to:
+  /// **'Address (Tamil)'**
+  String get businessAddressTamil;
+
+  /// No description provided for @selectLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Language'**
+  String get selectLanguage;
+
+  /// No description provided for @languageSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Language Selection'**
+  String get languageSelection;
+
+  /// No description provided for @pdfGeneratedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF Generated at {path}'**
+  String pdfGeneratedAt(Object path);
+
+  /// No description provided for @invoicePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice Preview'**
+  String get invoicePreview;
+
+  /// No description provided for @shareViaWhatsApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Share via WhatsApp'**
+  String get shareViaWhatsApp;
+
+  /// No description provided for @backToDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'BACK TO DASHBOARD'**
+  String get backToDashboard;
+
+  /// No description provided for @newBill.
+  ///
+  /// In en, this message translates to:
+  /// **'NEW BILL'**
+  String get newBill;
+
+  /// No description provided for @generateBill.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate Bill'**
+  String get generateBill;
+
+  /// No description provided for @allDataCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'All data cleared'**
+  String get allDataCleared;
+
+  /// No description provided for @pleaseAddItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Please add at least one item to the bill'**
+  String get pleaseAddItems;
+
+  /// No description provided for @addItem.
+  ///
+  /// In en, this message translates to:
+  /// **'ADD ITEM'**
+  String get addItem;
+
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'NEXT'**
+  String get next;
+
+  /// No description provided for @balanceDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance Due'**
+  String get balanceDue;
+
+  /// No description provided for @desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Desc'**
+  String get desc;
+
+  /// No description provided for @noItemsAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'No items added'**
+  String get noItemsAdded;
+
+  /// No description provided for @clearAllDataQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All Data?'**
+  String get clearAllDataQuestion;
+
+  /// No description provided for @clearAllDataWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This will reset all billing items and payment details. This action cannot be undone.'**
+  String get clearAllDataWarning;
+
+  /// No description provided for @clearAllAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All'**
+  String get clearAllAction;
+
   /// No description provided for @paymentMode.
   ///
   /// In en, this message translates to:
@@ -613,12 +871,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Record Payment'**
   String get recordPayment;
-
-  /// No description provided for @paymentHistory.
-  ///
-  /// In en, this message translates to:
-  /// **'Payment History'**
-  String get paymentHistory;
 
   /// No description provided for @partialPayment.
   ///
@@ -875,8 +1127,8 @@ abstract class AppLocalizations {
   /// No description provided for @lastBackup.
   ///
   /// In en, this message translates to:
-  /// **'Last Backup'**
-  String get lastBackup;
+  /// **'Last backup: {time}'**
+  String lastBackup(String time);
 
   /// No description provided for @backupNow.
   ///
@@ -889,6 +1141,480 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Restore from Backup'**
   String get restoreFromBackup;
+
+  /// No description provided for @general.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get general;
+
+  /// No description provided for @darkModeEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark Mode Enabled'**
+  String get darkModeEnabled;
+
+  /// No description provided for @lightModeEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Light Mode Enabled'**
+  String get lightModeEnabled;
+
+  /// No description provided for @business.
+  ///
+  /// In en, this message translates to:
+  /// **'Business'**
+  String get business;
+
+  /// No description provided for @manageBusinessDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your business details'**
+  String get manageBusinessDetails;
+
+  /// No description provided for @data.
+  ///
+  /// In en, this message translates to:
+  /// **'Data'**
+  String get data;
+
+  /// No description provided for @backupYourData.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup your data'**
+  String get backupYourData;
+
+  /// No description provided for @backupFeatureComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup feature coming soon'**
+  String get backupFeatureComingSoon;
+
+  /// No description provided for @restoreFeatureComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore feature coming soon'**
+  String get restoreFeatureComingSoon;
+
+  /// No description provided for @about.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get about;
+
+  /// No description provided for @version.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get version;
+
+  /// No description provided for @appVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'1.0.0'**
+  String get appVersion;
+
+  /// No description provided for @backupSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup & Restore'**
+  String get backupSettings;
+
+  /// No description provided for @connectionStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud Connection'**
+  String get connectionStatus;
+
+  /// No description provided for @connectedToSupabase.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected to Cloud'**
+  String get connectedToSupabase;
+
+  /// No description provided for @notConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not connected'**
+  String get notConnected;
+
+  /// No description provided for @supabaseNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud Backup Not Configured'**
+  String get supabaseNotConfigured;
+
+  /// No description provided for @testConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Test Connection'**
+  String get testConnection;
+
+  /// No description provided for @manualBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual Cloud Backup'**
+  String get manualBackup;
+
+  /// No description provided for @manualBackupDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup your bills and payment data to the secure cloud manually.'**
+  String get manualBackupDescription;
+
+  /// No description provided for @automaticBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic Cloud Backup'**
+  String get automaticBackup;
+
+  /// No description provided for @automaticBackupDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data is automatically backed up to the cloud daily at 12:00 AM.'**
+  String get automaticBackupDescription;
+
+  /// No description provided for @enableAutomaticBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Automatic Backup'**
+  String get enableAutomaticBackup;
+
+  /// No description provided for @backupTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup Time'**
+  String get backupTime;
+
+  /// No description provided for @dailyBackupTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Backup Time'**
+  String get dailyBackupTime;
+
+  /// No description provided for @lastImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Last restore: {time}'**
+  String lastImport(Object time);
+
+  /// No description provided for @automaticImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic Restore'**
+  String get automaticImport;
+
+  /// No description provided for @automaticImportDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data is automatically restored from the cloud daily at 1:00 AM.'**
+  String get automaticImportDescription;
+
+  /// No description provided for @enableAutomaticImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Automatic Restore'**
+  String get enableAutomaticImport;
+
+  /// No description provided for @dailyImportTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Restore Time'**
+  String get dailyImportTime;
+
+  /// No description provided for @aboutImport.
+  ///
+  /// In en, this message translates to:
+  /// **'About Restore'**
+  String get aboutImport;
+
+  /// No description provided for @aboutImportDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Data is automatically restored from the cloud to ensure all devices are in sync.'**
+  String get aboutImportDescription;
+
+  /// No description provided for @aboutBackups.
+  ///
+  /// In en, this message translates to:
+  /// **'About Backups'**
+  String get aboutBackups;
+
+  /// No description provided for @aboutBackupsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data is securely backed up to cloud storage. Both new and updated bills are automatically synced.'**
+  String get aboutBackupsDescription;
+
+  /// No description provided for @startingBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting backup...'**
+  String get startingBackup;
+
+  /// No description provided for @backupSuccessful.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup Successful'**
+  String get backupSuccessful;
+
+  /// No description provided for @dataBackedUpSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data has been backed up successfully!'**
+  String get dataBackedUpSuccessfully;
+
+  /// No description provided for @billsSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Bills synced:'**
+  String get billsSynced;
+
+  /// No description provided for @billsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Bills failed:'**
+  String get billsFailed;
+
+  /// No description provided for @paymentsSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments synced:'**
+  String get paymentsSynced;
+
+  /// No description provided for @paymentsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments failed:'**
+  String get paymentsFailed;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// No description provided for @importFromSupabase.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore from Cloud'**
+  String get importFromSupabase;
+
+  /// No description provided for @importFromSupabaseDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch all bills and payments from the cloud and save them locally.'**
+  String get importFromSupabaseDescription;
+
+  /// No description provided for @importNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Now'**
+  String get importNow;
+
+  /// No description provided for @importFromCloudConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore from Cloud?'**
+  String get importFromCloudConfirmTitle;
+
+  /// No description provided for @importFromCloudConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will fetch all data from the cloud and merge it with your local data.'**
+  String get importFromCloudConfirmMessage;
+
+  /// No description provided for @importSuccessful.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Successful'**
+  String get importSuccessful;
+
+  /// No description provided for @dataImportedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Data successfully restored from cloud.'**
+  String get dataImportedSuccessfully;
+
+  /// No description provided for @billsRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Bills Restored'**
+  String get billsRestored;
+
+  /// No description provided for @paymentsRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments Restored'**
+  String get paymentsRestored;
+
+  /// No description provided for @importFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Failed'**
+  String get importFailed;
+
+  /// No description provided for @importError.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Error'**
+  String get importError;
+
+  /// No description provided for @excelSyncSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Excel Report Settings'**
+  String get excelSyncSettings;
+
+  /// No description provided for @enableExcelSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Weekly Excel Report'**
+  String get enableExcelSync;
+
+  /// No description provided for @excelSyncDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically export data to an Excel file in your Documents folder.'**
+  String get excelSyncDescription;
+
+  /// No description provided for @syncFrequency.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Frequency'**
+  String get syncFrequency;
+
+  /// No description provided for @everyDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {days} days'**
+  String everyDays(Object days);
+
+  /// No description provided for @manualExcelSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual Excel Export'**
+  String get manualExcelSync;
+
+  /// No description provided for @manualExcelSyncDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Export your data to an Excel file immediately.'**
+  String get manualExcelSyncDescription;
+
+  /// No description provided for @exportNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Now'**
+  String get exportNow;
+
+  /// No description provided for @exporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Exporting...'**
+  String get exporting;
+
+  /// No description provided for @excelSyncStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Excel Export Status'**
+  String get excelSyncStatus;
+
+  /// No description provided for @lastExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Last export: {time}'**
+  String lastExport(Object time);
+
+  /// No description provided for @noExportHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'No export history available'**
+  String get noExportHistory;
+
+  /// No description provided for @excelExportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Excel Export Successful'**
+  String get excelExportSuccess;
+
+  /// No description provided for @excelExportSuccessMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Data exported to Documents/FurnitureBillingData'**
+  String get excelExportSuccessMessage;
+
+  /// No description provided for @excelExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Excel Export Failed'**
+  String get excelExportFailed;
+
+  /// No description provided for @backupToCloudConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup to Cloud?'**
+  String get backupToCloudConfirmTitle;
+
+  /// No description provided for @backupToCloudConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will backup all your data to the cloud.'**
+  String get backupToCloudConfirmMessage;
+
+  /// No description provided for @exitConfirmationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit?'**
+  String get exitConfirmationTitle;
+
+  /// No description provided for @exitConfirmationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to go back?'**
+  String get exitConfirmationMessage;
+
+  /// No description provided for @exitApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit App?'**
+  String get exitApp;
+
+  /// No description provided for @exitAppConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to exit the application?'**
+  String get exitAppConfirmation;
+
+  /// No description provided for @exit.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit'**
+  String get exit;
+
+  /// No description provided for @connectedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected successfully ({latency}ms)'**
+  String connectedSuccessfully(String latency);
+
+  /// No description provided for @connectionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection failed: {message}'**
+  String connectionFailed(String message);
+
+  /// No description provided for @backupFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup Failed'**
+  String get backupFailed;
+
+  /// No description provided for @backupError.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup Error'**
+  String get backupError;
 
   /// No description provided for @generatePdf.
   ///
@@ -1039,12 +1765,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Advance Payment'**
   String get advancePayment;
-
-  /// No description provided for @balanceDue.
-  ///
-  /// In en, this message translates to:
-  /// **'Balance Due'**
-  String get balanceDue;
 
   /// No description provided for @notes.
   ///
@@ -1244,6 +1964,18 @@ abstract class AppLocalizations {
   /// **'Custom'**
   String get custom;
 
+  /// No description provided for @totalBills.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Bills'**
+  String get totalBills;
+
+  /// No description provided for @unpaidBills.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid Bills'**
+  String get unpaidBills;
+
   /// No description provided for @noReportsData.
   ///
   /// In en, this message translates to:
@@ -1253,7 +1985,7 @@ abstract class AppLocalizations {
   /// No description provided for @clearAll.
   ///
   /// In en, this message translates to:
-  /// **'Clear All'**
+  /// **'CLEAR ALL'**
   String get clearAll;
 
   /// No description provided for @clearAllConfirmation.
@@ -1285,6 +2017,432 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Are you sure you want to delete this item?'**
   String get deleteItemConfirmation;
+
+  /// No description provided for @billNo.
+  ///
+  /// In en, this message translates to:
+  /// **'BILL NO'**
+  String get billNo;
+
+  /// No description provided for @date.
+  ///
+  /// In en, this message translates to:
+  /// **'DATE'**
+  String get date;
+
+  /// No description provided for @customer.
+  ///
+  /// In en, this message translates to:
+  /// **'CUS'**
+  String get customer;
+
+  /// No description provided for @total.
+  ///
+  /// In en, this message translates to:
+  /// **'TOTAL'**
+  String get total;
+
+  /// No description provided for @due.
+  ///
+  /// In en, this message translates to:
+  /// **'DUE'**
+  String get due;
+
+  /// No description provided for @billPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill Payments'**
+  String get billPayments;
+
+  /// No description provided for @unpaidPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid/Partial'**
+  String get unpaidPartial;
+
+  /// No description provided for @searchBillNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Search bill number'**
+  String get searchBillNumber;
+
+  /// No description provided for @noInvoicesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No invoices found'**
+  String get noInvoicesFound;
+
+  /// No description provided for @deleteBill.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Bill'**
+  String get deleteBill;
+
+  /// No description provided for @deleteBillConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete Bill #{number}? This action cannot be undone.'**
+  String deleteBillConfirmation(String number);
+
+  /// No description provided for @billDeletedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill deleted successfully'**
+  String get billDeletedSuccessfully;
+
+  /// No description provided for @failedToDeleteBill.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete bill'**
+  String get failedToDeleteBill;
+
+  /// No description provided for @reviewAndSave.
+  ///
+  /// In en, this message translates to:
+  /// **'REVIEW & SAVE'**
+  String get reviewAndSave;
+
+  /// No description provided for @reviewAndFinalize.
+  ///
+  /// In en, this message translates to:
+  /// **'Review & Finalize'**
+  String get reviewAndFinalize;
+
+  /// No description provided for @billGenerated.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill Generated'**
+  String get billGenerated;
+
+  /// No description provided for @billSavedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill Saved Successfully'**
+  String get billSavedSuccessfully;
+
+  /// No description provided for @confirmAndGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'CONFIRM & GENERATE'**
+  String get confirmAndGenerate;
+
+  /// No description provided for @invoiceGeneratedAndSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice Generated & Saved Successfully!'**
+  String get invoiceGeneratedAndSaved;
+
+  /// No description provided for @invoiceUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice Updated Successfully!'**
+  String get invoiceUpdatedSuccessfully;
+
+  /// No description provided for @failedToSaveInvoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save invoice'**
+  String get failedToSaveInvoice;
+
+  /// No description provided for @maxPaymentError.
+  ///
+  /// In en, this message translates to:
+  /// **'Max: {amount}'**
+  String maxPaymentError(String amount);
+
+  /// No description provided for @clearAllData.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All Data?'**
+  String get clearAllData;
+
+  /// No description provided for @clearAllDataConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'This will reset all billing items and payment details. This action cannot be undone.'**
+  String get clearAllDataConfirmation;
+
+  /// No description provided for @billSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'BILL SUMMARY'**
+  String get billSummary;
+
+  /// No description provided for @advancePaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Advance Paid'**
+  String get advancePaid;
+
+  /// No description provided for @pending.
+  ///
+  /// In en, this message translates to:
+  /// **'PENDING'**
+  String get pending;
+
+  /// No description provided for @partial.
+  ///
+  /// In en, this message translates to:
+  /// **'PARTIAL'**
+  String get partial;
+
+  /// No description provided for @qty.
+  ///
+  /// In en, this message translates to:
+  /// **'QTY'**
+  String get qty;
+
+  /// No description provided for @totLen.
+  ///
+  /// In en, this message translates to:
+  /// **'TOT.LEN'**
+  String get totLen;
+
+  /// No description provided for @thankYouMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you for your business!'**
+  String get thankYouMessage;
+
+  /// No description provided for @enterWhatsappNumberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter WhatsApp number to send directly, or leave empty to select a chat.'**
+  String get enterWhatsappNumberHint;
+
+  /// No description provided for @nameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'NAME'**
+  String get nameLabel;
+
+  /// No description provided for @dateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'DATE'**
+  String get dateLabel;
+
+  /// No description provided for @phoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get phoneLabel;
+
+  /// No description provided for @descriptionShort.
+  ///
+  /// In en, this message translates to:
+  /// **'DESCRIPTION'**
+  String get descriptionShort;
+
+  /// No description provided for @lengthShort.
+  ///
+  /// In en, this message translates to:
+  /// **'LENGTH'**
+  String get lengthShort;
+
+  /// No description provided for @qtyShort.
+  ///
+  /// In en, this message translates to:
+  /// **'QTY'**
+  String get qtyShort;
+
+  /// No description provided for @totalLenShort.
+  ///
+  /// In en, this message translates to:
+  /// **'TOT.LEN'**
+  String get totalLenShort;
+
+  /// No description provided for @rateShort.
+  ///
+  /// In en, this message translates to:
+  /// **'RATE'**
+  String get rateShort;
+
+  /// No description provided for @totalShort.
+  ///
+  /// In en, this message translates to:
+  /// **'TOTAL'**
+  String get totalShort;
+
+  /// No description provided for @balanceDueUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'BALANCE DUE'**
+  String get balanceDueUpper;
+
+  /// No description provided for @defaultBusinessName.
+  ///
+  /// In en, this message translates to:
+  /// **'BUSINESS NAME'**
+  String get defaultBusinessName;
+
+  /// No description provided for @whatsappNumberHintExample.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., 9876543210'**
+  String get whatsappNumberHintExample;
+
+  /// No description provided for @billNumberPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'BILL #'**
+  String get billNumberPrefix;
+
+  /// No description provided for @totalAmountCaps.
+  ///
+  /// In en, this message translates to:
+  /// **'TOTAL AMOUNT'**
+  String get totalAmountCaps;
+
+  /// No description provided for @initialPaymentNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Initial payment for bill {number}'**
+  String initialPaymentNote(String number);
+
+  /// No description provided for @failedToSaveInvoiceWithDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save invoice: {error}'**
+  String failedToSaveInvoiceWithDetail(String error);
+
+  /// No description provided for @internetConnectionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Internet connection failed. Please check your data or Wi-Fi connection and try again.'**
+  String get internetConnectionFailed;
+
+  /// No description provided for @connectionTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'The connection timed out. Please try again when you have a better network.'**
+  String get connectionTimeout;
+
+  /// No description provided for @cloudConnectionError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not connect to the cloud server. Please try again in a few minutes.'**
+  String get cloudConnectionError;
+
+  /// No description provided for @paymentHistoryNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment for Invoice #{number}'**
+  String paymentHistoryNote(Object number);
+
+  /// No description provided for @supabaseCredentialsMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Supabase credentials not found'**
+  String get supabaseCredentialsMissing;
+
+  /// No description provided for @configureSupabaseMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please configure your Supabase credentials in the app settings.'**
+  String get configureSupabaseMessage;
+
+  /// No description provided for @unknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown error'**
+  String get unknownError;
+
+  /// No description provided for @initializingBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Initializing backup...'**
+  String get initializingBackup;
+
+  /// No description provided for @backingUpBills.
+  ///
+  /// In en, this message translates to:
+  /// **'Backing up bills...'**
+  String get backingUpBills;
+
+  /// No description provided for @backingUpPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Backing up payments...'**
+  String get backingUpPayments;
+
+  /// No description provided for @fetchingBills.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching bills from cloud...'**
+  String get fetchingBills;
+
+  /// No description provided for @fetchingPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching payments from cloud...'**
+  String get fetchingPayments;
+
+  /// No description provided for @checkingDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking for deleted records...'**
+  String get checkingDeleted;
+
+  /// No description provided for @removingDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Removing deleted records locally...'**
+  String get removingDeleted;
+
+  /// No description provided for @restoringBill.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring bill {current}/{total}...'**
+  String restoringBill(int current, int total);
+
+  /// No description provided for @restoringPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring payment {current}/{total}...'**
+  String restoringPayment(int current, int total);
+
+  /// No description provided for @restorationCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoration completed!'**
+  String get restorationCompleted;
+
+  /// No description provided for @backupCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup completed!'**
+  String get backupCompleted;
+
+  /// No description provided for @noInternetConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection'**
+  String get noInternetConnection;
+
+  /// No description provided for @supabaseNotInitialized.
+  ///
+  /// In en, this message translates to:
+  /// **'Supabase not initialized'**
+  String get supabaseNotInitialized;
+
+  /// No description provided for @checkingConnectionProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking connection...'**
+  String get checkingConnectionProgress;
+
+  /// No description provided for @backingUpBill.
+  ///
+  /// In en, this message translates to:
+  /// **'Backing up bill {current}/{total}...'**
+  String backingUpBill(int current, int total);
+
+  /// No description provided for @backingUpPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Backing up payment {current}/{total}...'**
+  String backingUpPayment(int current, int total);
 }
 
 class _AppLocalizationsDelegate

@@ -4,7 +4,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/theme_tokens.dart';
-import '../../../core/utils/validation_utils.dart';
+import 'widgets/business_logo_picker.dart';
+import 'widgets/business_profile_form.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../providers/business_profile_provider.dart';
 
@@ -22,6 +23,8 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
   final _businessNameController = TextEditingController();
   final _primaryPhoneController = TextEditingController();
   final _businessAddressController = TextEditingController();
+  final _businessNameTamilController = TextEditingController();
+  final _businessAddressTamilController = TextEditingController();
 
   String? _logoPath;
   final ImagePicker _imagePicker = ImagePicker();
@@ -40,6 +43,8 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
       _businessNameController.text = profile.businessName;
       _primaryPhoneController.text = profile.primaryPhone ?? '';
       _businessAddressController.text = profile.businessAddress ?? '';
+      _businessNameTamilController.text = profile.businessNameTamil ?? '';
+      _businessAddressTamilController.text = profile.businessAddressTamil ?? '';
       _logoPath = profile.logoPath;
     }
   }
@@ -87,6 +92,12 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
       businessAddress: _businessAddressController.text.trim().isEmpty
           ? null
           : _businessAddressController.text.trim(),
+      businessNameTamil: _businessNameTamilController.text.trim().isEmpty
+          ? null
+          : _businessNameTamilController.text.trim(),
+      businessAddressTamil: _businessAddressTamilController.text.trim().isEmpty
+          ? null
+          : _businessAddressTamilController.text.trim(),
     );
 
     if (mounted) {
@@ -109,6 +120,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
     }
   }
 
+  @override
   void dispose() {
     _businessNameController.dispose();
     _primaryPhoneController.dispose();
@@ -139,100 +151,17 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
             child: ListView(
               padding: EdgeInsets.all(ThemeTokens.spacingMd),
               children: [
-                // Logo Section
-                Center(
-                  child: Column(
-                    children: [
-                      GestureDetector(
-                        onTap: _pickImage,
-                        child: Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(ThemeTokens.radiusLarge),
-                            border: Border.all(
-                              color: theme.colorScheme.outline,
-                              width: 2,
-                            ),
-                          ),
-                          child: _logoPath != null
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(ThemeTokens.radiusLarge),
-                                  child: Image.file(
-                                    File(_logoPath!),
-                                    fit: BoxFit.cover,
-                                  ),
-                                )
-                              : Image.asset(
-                                  'assets/images/logo.png',
-                                  fit: BoxFit.cover,
-                                ),
-                        ),
-                      ),
-                      SizedBox(height: ThemeTokens.spacingSm),
-                      
-        
-                    ],
-                  ),
+                BusinessLogoPicker(
+                  logoPath: _logoPath,
+                  onPickImage: _pickImage,
                 ),
-
-                SizedBox(height: ThemeTokens.spacingLg),
-
-                // Business Name (Required)
-                TextFormField(
-                  controller: _businessNameController,
-                  decoration: InputDecoration(
-                    labelText: '${l10n.businessName} *',
-                    hintText: l10n.required,
-                    prefixIcon: const Icon(Icons.business_center),
-                  ),
-                  validator: ValidationUtils.validateBusinessName,
-                  textCapitalization: TextCapitalization.words,
+                BusinessProfileForm(
+                  businessNameController: _businessNameController,
+                  primaryPhoneController: _primaryPhoneController,
+                  businessAddressController: _businessAddressController,
+                  businessNameTamilController: _businessNameTamilController,
+                  businessAddressTamilController: _businessAddressTamilController,
                 ),
-
-      
-
-                SizedBox(height: ThemeTokens.spacingMd),
-
-                // Primary Phone (Required)
-                TextFormField(
-                  controller: _primaryPhoneController,
-                  decoration: InputDecoration(
-                    labelText: '${l10n.primaryPhone} *',
-                    hintText: '9876543210',
-                    prefixIcon: const Icon(Icons.phone),
-                  ),
-                  keyboardType: TextInputType.phone,
-                  validator: (value) => ValidationUtils.validatePhoneNumber(value, required: true),
-                ),
-
-         
-             
-           
-              
-
-              
-                SizedBox(height: ThemeTokens.spacingMd),
-
-                // Business Address (Required)
-                TextFormField(
-                  controller: _businessAddressController,
-                  decoration: InputDecoration(
-                    labelText: '${l10n.businessAddress} *',
-                    hintText: l10n.businessAddress,
-                    prefixIcon: const Icon(Icons.location_on),
-                  ),
-                  maxLines: 3,
-                  textCapitalization: TextCapitalization.sentences,
-                  validator: (value) => value == null || value.trim().isEmpty ? l10n.required : null,
-                ),
-
-                SizedBox(height: ThemeTokens.spacingXl),
-
-
-
-      
               ],
             ),
           );
@@ -244,7 +173,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
           color: theme.colorScheme.surface,
           boxShadow: [
              BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, -5),
             ),

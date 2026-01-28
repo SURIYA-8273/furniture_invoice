@@ -62,8 +62,8 @@ class PaymentHistoryRepositoryImpl implements PaymentHistoryRepository {
     // Filter by invoiceId
     final matchedPayments = allPayments.where((p) => p.invoiceId == invoiceId).toList();
     
-    // Sort by date (newest first)
-    matchedPayments.sort((a, b) => b.paymentDate.compareTo(a.paymentDate));
+    // Sort by creation date (newest first)
+    matchedPayments.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     
     return matchedPayments;
   }

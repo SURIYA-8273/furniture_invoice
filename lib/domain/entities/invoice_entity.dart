@@ -7,13 +7,10 @@ class InvoiceEntity {
   final String invoiceNumber; // INV-000001
   final String? customerName;
   final List<InvoiceItemEntity> items;
-  final double subtotal; // Sum of all item amounts
-  final double discount; // Discount amount
-  final double gst; // GST amount
-  final double grandTotal; // subtotal - discount + gst
+  final double grandTotal; // Sum of all item amounts
   final double paidAmount; // Amount paid
   final double balanceAmount; // grandTotal - paidAmount
-  final String status; // draft, pending, paid, partially_paid, cancelled
+  final String status; // unpaid, partial, paid, cancelled
   final DateTime invoiceDate;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -23,9 +20,6 @@ class InvoiceEntity {
     required this.invoiceNumber,
     this.customerName,
     required this.items,
-    required this.subtotal,
-    this.discount = 0.0,
-    this.gst = 0.0,
     required this.grandTotal,
     this.paidAmount = 0.0,
     required this.balanceAmount,
@@ -35,14 +29,9 @@ class InvoiceEntity {
     required this.updatedAt,
   });
 
-  /// Calculate subtotal from items
-  static double calculateSubtotal(List<InvoiceItemEntity> items) {
+  /// Calculate grand total from items
+  static double calculateGrandTotal(List<InvoiceItemEntity> items) {
     return items.fold(0.0, (sum, item) => sum + item.totalAmount);
-  }
-
-  /// Calculate grand total
-  static double calculateGrandTotal(double subtotal, double discount, double gst) {
-    return subtotal - discount + gst;
   }
 
   /// Calculate balance amount
@@ -52,9 +41,9 @@ class InvoiceEntity {
 
   /// Determine invoice status based on payment
   static String determineStatus(double grandTotal, double paidAmount) {
-    if (paidAmount <= 0) return 'pending';
+    if (paidAmount <= 0) return 'unpaid';
     if (paidAmount >= grandTotal) return 'paid';
-    return 'partially_paid';
+    return 'partial';
   }
 
   /// Check if invoice is fully paid
@@ -69,9 +58,6 @@ class InvoiceEntity {
     String? invoiceNumber,
     String? customerName,
     List<InvoiceItemEntity>? items,
-    double? subtotal,
-    double? discount,
-    double? gst,
     double? grandTotal,
     double? paidAmount,
     double? balanceAmount,
@@ -85,9 +71,6 @@ class InvoiceEntity {
       invoiceNumber: invoiceNumber ?? this.invoiceNumber,
       customerName: customerName ?? this.customerName,
       items: items ?? this.items,
-      subtotal: subtotal ?? this.subtotal,
-      discount: discount ?? this.discount,
-      gst: gst ?? this.gst,
       grandTotal: grandTotal ?? this.grandTotal,
       paidAmount: paidAmount ?? this.paidAmount,
       balanceAmount: balanceAmount ?? this.balanceAmount,

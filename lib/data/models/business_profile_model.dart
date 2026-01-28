@@ -37,6 +37,12 @@ class BusinessProfileModel extends HiveObject {
   @HiveField(9)
   final String? businessAddress;
 
+  @HiveField(12)
+  final String? businessNameTamil;
+
+  @HiveField(13)
+  final String? businessAddressTamil;
+
   @HiveField(10)
   final DateTime createdAt;
 
@@ -54,6 +60,8 @@ class BusinessProfileModel extends HiveObject {
     this.websiteUrl,
     this.gstNumber,
     this.businessAddress,
+    this.businessNameTamil,
+    this.businessAddressTamil,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -71,6 +79,8 @@ class BusinessProfileModel extends HiveObject {
       websiteUrl: entity.websiteUrl,
       gstNumber: entity.gstNumber,
       businessAddress: entity.businessAddress,
+      businessNameTamil: entity.businessNameTamil,
+      businessAddressTamil: entity.businessAddressTamil,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     );
@@ -89,6 +99,8 @@ class BusinessProfileModel extends HiveObject {
       websiteUrl: websiteUrl,
       gstNumber: gstNumber,
       businessAddress: businessAddress,
+      businessNameTamil: businessNameTamil,
+      businessAddressTamil: businessAddressTamil,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
@@ -107,6 +119,8 @@ class BusinessProfileModel extends HiveObject {
       'websiteUrl': websiteUrl,
       'gstNumber': gstNumber,
       'businessAddress': businessAddress,
+      'businessNameTamil': businessNameTamil,
+      'businessAddressTamil': businessAddressTamil,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
@@ -125,6 +139,8 @@ class BusinessProfileModel extends HiveObject {
       websiteUrl: json['websiteUrl'] as String?,
       gstNumber: json['gstNumber'] as String?,
       businessAddress: json['businessAddress'] as String?,
+      businessNameTamil: json['businessNameTamil'] as String?,
+      businessAddressTamil: json['businessAddressTamil'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
@@ -142,6 +158,8 @@ class BusinessProfileModel extends HiveObject {
     String? websiteUrl,
     String? gstNumber,
     String? businessAddress,
+    String? businessNameTamil,
+    String? businessAddressTamil,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -156,6 +174,8 @@ class BusinessProfileModel extends HiveObject {
       websiteUrl: websiteUrl ?? this.websiteUrl,
       gstNumber: gstNumber ?? this.gstNumber,
       businessAddress: businessAddress ?? this.businessAddress,
+      businessNameTamil: businessNameTamil ?? this.businessNameTamil,
+      businessAddressTamil: businessAddressTamil ?? this.businessAddressTamil,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

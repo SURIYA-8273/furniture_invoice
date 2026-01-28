@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/theme_tokens.dart';
 import '../../../core/utils/calculation_utils.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../providers/invoice_provider.dart';
 import '../../../domain/entities/invoice_entity.dart';
+import 'widgets/date_range_filter_card.dart';
+import 'widgets/report_summary_card.dart';
 
 /// Reports Screen with comprehensive analytics
 class ReportsScreen extends StatefulWidget {
@@ -75,22 +76,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.reports),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.file_download),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('${l10n.export} - Coming Soon')),
-              );
-            },
-            tooltip: l10n.export,
-          ),
-        ],
       ),
       body: Consumer<InvoiceProvider>(
         builder: (context, invoiceProvider, child) {
@@ -117,7 +106,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Date Range Filter
-                _buildDateRangeFilter(l10n, theme),
+                DateRangeFilterCard(
+                  selectedPeriod: _selectedPeriod,
+                  selectedDateRange: _selectedDateRange,
+                  onPeriodChanged: _setDateRangeForPeriod,
+                  onCustomDateSelected: _selectCustomDateRange,
+                ),
                 SizedBox(height: ThemeTokens.spacingMd),
 
                 // Summary Grid
@@ -129,33 +123,29 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   physics: const NeverScrollableScrollPhysics(),
                   childAspectRatio: 1.2,
                   children: [
-                    _buildSummaryCard(
-                      l10n.totalSales,
-                      CalculationUtils.formatCurrency(totalSales),
-                      Icons.trending_up,
-                      const Color(0xFF10B981),
-                      theme,
+                    ReportSummaryCard(
+                      title: l10n.totalSales,
+                      value: CalculationUtils.formatCurrency(totalSales),
+                      icon: Icons.trending_up,
+                      color: ThemeTokens.summaryCardSales,
                     ),
-                    _buildSummaryCard(
-                      l10n.totalPending,
-                      CalculationUtils.formatCurrency(totalPending),
-                      Icons.pending,
-                      const Color(0xFFEF4444), // Red for pending/alert
-                      theme,
+                    ReportSummaryCard(
+                      title: l10n.totalPending,
+                      value: CalculationUtils.formatCurrency(totalPending),
+                      icon: Icons.pending,
+                      color: ThemeTokens.summaryCardPending,
                     ),
-                    _buildSummaryCard(
-                      'Total Bill', // l10n.totalBills if available, else string
-                      totalDetails.toString(),
-                      Icons.receipt_long,
-                      const Color(0xFF6366F1),
-                      theme,
+                    ReportSummaryCard(
+                      title: l10n.totalBills,
+                      value: totalDetails.toString(),
+                      icon: Icons.receipt_long,
+                      color: ThemeTokens.summaryCardBills,
                     ),
-                    _buildSummaryCard(
-                      'Total Unpaid Bills', // l10n.unpaidBills if available
-                      totalUnpaidBills.toString(),
-                      Icons.error_outline,
-                      const Color(0xFFF59E0B),
-                      theme,
+                    ReportSummaryCard(
+                      title: l10n.unpaidBills,
+                      value: totalUnpaidBills.toString(),
+                      icon: Icons.error_outline,
+                      color: ThemeTokens.summaryCardUnpaid,
                     ),
                   ],
                 ),
@@ -177,158 +167,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
              invoice.invoiceDate.isBefore(_selectedDateRange!.end.add(const Duration(seconds: 1)));
     }).toList();
   }
-
-  Widget _buildDateRangeFilter(AppLocalizations l10n, ThemeData theme) {
-    return Container(
-      padding: EdgeInsets.all(ThemeTokens.spacingMd),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(ThemeTokens.radiusMedium),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.calendar_today, size: 16, color: theme.colorScheme.primary),
-              const SizedBox(width: 8),
-              Text(
-                l10n.dateRange.toUpperCase(),
-                style: theme.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w900,
-                  color: Colors.grey[600],
-                  letterSpacing: 1.0,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: ThemeTokens.spacingMd),
-          Wrap(
-            spacing: ThemeTokens.spacingSm,
-            runSpacing: ThemeTokens.spacingSm,
-            children: [
-              _buildPeriodChip('today', 'Today', theme),
-              _buildPeriodChip('week', 'This Week', theme),
-              _buildPeriodChip('month', 'This Month', theme),
-              FilterChip(
-                label: Text(_selectedPeriod == 'custom' && _selectedDateRange != null
-                    ? '${DateFormat('dd/MM').format(_selectedDateRange!.start)} - ${DateFormat('dd/MM').format(_selectedDateRange!.end)}'
-                    : 'Custom'),
-                selected: _selectedPeriod == 'custom',
-                onSelected: (selected) => _selectCustomDateRange(),
-                backgroundColor: Colors.grey[100],
-                selectedColor: theme.colorScheme.primaryContainer,
-                checkmarkColor: theme.colorScheme.primary,
-                labelStyle: TextStyle(
-                  color: _selectedPeriod == 'custom' ? theme.colorScheme.primary : Colors.black87,
-                  fontWeight: _selectedPeriod == 'custom' ? FontWeight.bold : FontWeight.normal,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  side: BorderSide(
-                    color: _selectedPeriod == 'custom' ? theme.colorScheme.primary.withOpacity(0.5) : Colors.transparent,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPeriodChip(String period, String label, ThemeData theme) {
-    final isSelected = _selectedPeriod == period;
-    return FilterChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (selected) {
-        if (selected) _setDateRangeForPeriod(period);
-      },
-      backgroundColor: Colors.grey[100],
-      selectedColor: theme.colorScheme.primaryContainer,
-      checkmarkColor: theme.colorScheme.primary,
-      labelStyle: TextStyle(
-        color: isSelected ? theme.colorScheme.primary : Colors.black87,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: isSelected ? theme.colorScheme.primary.withOpacity(0.5) : Colors.transparent,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSummaryCard(String title, String value, IconData icon, Color color, ThemeData theme) {
-    return Container(
-      padding: EdgeInsets.all(ThemeTokens.spacingMd),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(ThemeTokens.radiusMedium),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(color: color.withOpacity(0.2)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: color, size: 20),
-          ),
-          Column(
-             crossAxisAlignment: CrossAxisAlignment.start,
-             mainAxisSize: MainAxisSize.min,
-             children: [
-               FittedBox(
-                 fit: BoxFit.scaleDown,
-                 alignment: Alignment.centerLeft,
-                 child: Text(
-                   value,
-                   style: theme.textTheme.headlineSmall?.copyWith(
-                     fontWeight: ThemeTokens.fontWeightBold,
-                     color: theme.colorScheme.onSurface,
-                     fontSize: 22,
-                   ),
-                 ),
-               ),
-               const SizedBox(height: 4),
-               Text(
-                 title,
-                 style: theme.textTheme.bodyMedium?.copyWith(
-                   color: theme.colorScheme.onSurfaceVariant,
-                   fontSize: 12,
-                 ),
-                 maxLines: 2,
-                 overflow: TextOverflow.ellipsis,
-               ),
-             ],
-          ),
-        ],
-      ),
-    );
-  }
-
-
-
-
 }
+
+
+
+
+

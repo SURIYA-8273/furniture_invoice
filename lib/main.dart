@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'core/services/hive_service.dart';
+import 'core/services/supabase_service.dart';
+import 'core/background/backup_scheduler.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'presentation/providers/language_provider.dart';
@@ -25,7 +28,11 @@ import 'domain/usecases/payment_history/get_invoice_payments.dart';
 import 'data/repositories/payment_history_repository_impl.dart';
 import 'presentation/providers/payment_history_provider.dart';
 import 'presentation/providers/invoice_provider.dart';
-import 'presentation/screens/home/home_screen.dart';
+import 'presentation/providers/description_provider.dart';
+import 'data/repositories/description_repository_impl.dart';
+import 'data/models/description_model.dart';
+import 'core/constants/hive_box_names.dart';
+import 'presentation/screens/onboarding/onboarding_screen.dart';
 import 'l10n/app_localizations.dart';
 
 void main() async {
@@ -35,6 +42,39 @@ void main() async {
   // Initialize Hive
   await HiveService.instance.initialize();
   await HiveService.instance.openBoxes();
+  
+  // Initialize environment variables from .env
+  try {
+    await dotenv.load(fileName: ".env");
+    debugPrint('.env file loaded successfully');
+  } catch (e) {
+    debugPrint('Could not load .env file: $e');
+  }
+
+  // Initialize Supabase (load from .env or environment variables)
+  final supabaseUrl = dotenv.get('SUPABASE_URL', fallback: const String.fromEnvironment('SUPABASE_URL', defaultValue: ''));
+  final supabaseKey = dotenv.get('SUPABASE_ANON_KEY', fallback: const String.fromEnvironment('SUPABASE_ANON_KEY', defaultValue: ''));
+  
+  if (supabaseUrl.isNotEmpty && supabaseKey.isNotEmpty) {
+    try {
+      await SupabaseService.instance.initialize(
+        url: supabaseUrl,
+        anonKey: supabaseKey,
+      );
+      
+      // Initialize backup scheduler for automatic backups at 12:00 AM
+      await BackupSchedulerService.instance.initialize(
+        supabaseUrl: supabaseUrl,
+        supabaseKey: supabaseKey,
+      );
+      
+      debugPrint('Supabase and backup scheduler initialized');
+    } catch (e) {
+      debugPrint('Failed to initialize Supabase: $e');
+    }
+  } else {
+    debugPrint('Supabase credentials not provided - backup features disabled');
+  }
   
   // Initialize providers
   final themeProvider = ThemeProvider();
@@ -77,6 +117,10 @@ void main() async {
   final invoiceRepository = InvoiceRepositoryImpl();
   final invoiceProvider = InvoiceProvider(invoiceRepository: invoiceRepository);
   
+  // Initialize description dependencies
+  final descriptionRepository = DescriptionRepositoryImpl(HiveService.instance.getBox<DescriptionModel>(HiveBoxNames.descriptions));
+  final descriptionProvider = DescriptionProvider(repository: descriptionRepository);
+
   // Initialize billing calculation provider
   final billingCalculationProvider = BillingCalculationProvider();
   
@@ -90,6 +134,7 @@ void main() async {
         ChangeNotifierProvider.value(value: billingCalculationProvider),
         ChangeNotifierProvider.value(value: paymentHistoryProvider),
         ChangeNotifierProvider.value(value: invoiceProvider),
+        ChangeNotifierProvider.value(value: descriptionProvider),
       ],
       child: const FurnitureBillingApp(),
     ),
@@ -125,7 +170,7 @@ class FurnitureBillingApp extends StatelessWidget {
           ],
           
           // Home Screen
-          home: const HomeScreen(),
+          home: const OnboardingScreen(),
         );
       },
     );

@@ -61,6 +61,8 @@ class BusinessProfileProvider extends ChangeNotifier {
     String? websiteUrl,
     String? gstNumber,
     String? businessAddress,
+    String? businessNameTamil,
+    String? businessAddressTamil,
   }) async {
     try {
       _isLoading = true;
@@ -79,6 +81,8 @@ class BusinessProfileProvider extends ChangeNotifier {
         websiteUrl: websiteUrl,
         gstNumber: gstNumber,
         businessAddress: businessAddress,
+        businessNameTamil: businessNameTamil,
+        businessAddressTamil: businessAddressTamil,
         createdAt: _profile?.createdAt ?? now,
         updatedAt: now,
       );

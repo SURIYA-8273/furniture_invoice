@@ -12,38 +12,38 @@ class InvoiceItemEntity {
   final String productName;
   final InvoiceItemType type; // New field
   final String size; // 3×5, 4×6, custom (Only for measurement)
-  final double squareFeet; // Can be auto-calculated OR manually entered (Only for measurement)
+  final double length; // Can be auto-calculated OR manually entered (Only for measurement)
   final int quantity; // Pieces (Only for measurement)
-  final double totalQuantity; // squareFeet × quantity OR direct entry
-  final double mrp; // Price per unit (editable)
-  final double totalAmount; // mrp × totalQuantity (can be overridden)
+  final double totalLength; // length × quantity OR direct entry
+  final double rate; // Price per unit (editable)
+  final double totalAmount; // rate × totalLength (can be overridden)
 
   InvoiceItemEntity({
     required this.id,
     required this.productName,
     this.type = InvoiceItemType.measurement, // Default
     this.size = '',
-    this.squareFeet = 0.0,
+    this.length = 0.0,
     this.quantity = 1,
-    required this.totalQuantity,
-    required this.mrp,
+    required this.totalLength,
+    required this.rate,
     required this.totalAmount,
   });
 
-  /// Calculate square feet from size string (e.g., "3×5" = 15)
+  /// Calculate length from size string (e.g., "3×5" = 15)
   /// Deprecated: Size no longer determines calculations
-  static double calculateSquareFeetFromSize(String size) {
+  static double calculateLengthFromSize(String size) {
     return 0.0;
   }
 
-  /// Auto-calculate total quantity
-  static double calculateTotalQuantity(double squareFeet, int quantity) {
-    return squareFeet * quantity;
+  /// Auto-calculate total length
+  static double calculateTotalLength(double length, int quantity) {
+    return length * quantity;
   }
 
   /// Auto-calculate total amount
-  static double calculateTotalAmount(double mrp, double totalQuantity) {
-    return mrp * totalQuantity;
+  static double calculateTotalAmount(double rate, double totalLength) {
+    return rate * totalLength;
   }
 
   /// Create a copy with updated fields
@@ -52,10 +52,10 @@ class InvoiceItemEntity {
     String? productName,
     InvoiceItemType? type,
     String? size,
-    double? squareFeet,
+    double? length,
     int? quantity,
-    double? totalQuantity,
-    double? mrp,
+    double? totalLength,
+    double? rate,
     double? totalAmount,
   }) {
     return InvoiceItemEntity(
@@ -63,10 +63,10 @@ class InvoiceItemEntity {
       productName: productName ?? this.productName,
       type: type ?? this.type,
       size: size ?? this.size,
-      squareFeet: squareFeet ?? this.squareFeet,
+      length: length ?? this.length,
       quantity: quantity ?? this.quantity,
-      totalQuantity: totalQuantity ?? this.totalQuantity,
-      mrp: mrp ?? this.mrp,
+      totalLength: totalLength ?? this.totalLength,
+      rate: rate ?? this.rate,
       totalAmount: totalAmount ?? this.totalAmount,
     );
   }
@@ -85,10 +85,10 @@ class InvoiceItemEntity {
         other.productName == productName &&
         other.type == type &&
         other.size == size &&
-        other.squareFeet == squareFeet &&
+        other.length == length &&
         other.quantity == quantity &&
-        other.totalQuantity == totalQuantity &&
-        other.mrp == mrp &&
+        other.totalLength == totalLength &&
+        other.rate == rate &&
         other.totalAmount == totalAmount;
   }
 
@@ -98,10 +98,10 @@ class InvoiceItemEntity {
         productName.hashCode ^
         type.hashCode ^
         size.hashCode ^
-        squareFeet.hashCode ^
+        length.hashCode ^
         quantity.hashCode ^
-        totalQuantity.hashCode ^
-        mrp.hashCode ^
+        totalLength.hashCode ^
+        rate.hashCode ^
         totalAmount.hashCode;
   }
 }

@@ -14,8 +14,6 @@ class BillingCalculationProvider extends ChangeNotifier {
   List<InvoiceItemEntity> _items = [];
   
   // Financial calculations
-  double _discount = 0.0;
-  double _gstPercentage = 0.0;
   double _advancePayment = 0.0;
   
   // Invoice metadata
@@ -25,7 +23,7 @@ class BillingCalculationProvider extends ChangeNotifier {
   String _paymentTerms = '';
   
   // Payment details
-  String _paymentMethod = 'Cash';
+  String _paymentMethod = 'cash';
   
   // Additional details
   String _notes = '';
@@ -50,8 +48,6 @@ class BillingCalculationProvider extends ChangeNotifier {
   List<InvoiceItemEntity> get items => _items;
   
   // Getters - Financial
-  double get discount => _discount;
-  double get gstPercentage => _gstPercentage;
   double get advancePayment => _advancePayment;
   
   // Getters - Invoice metadata
@@ -69,19 +65,9 @@ class BillingCalculationProvider extends ChangeNotifier {
   DateTime? get deliveryDate => _deliveryDate;
   String get referenceNumber => _referenceNumber;
 
-  /// Calculate subtotal from all items
-  double get subtotal {
-    return _items.fold(0.0, (sum, item) => sum + item.totalAmount);
-  }
-
-  /// Calculate GST amount
-  double get gstAmount {
-    return (subtotal - _discount) * (_gstPercentage / 100);
-  }
-
   /// Calculate grand total
   double get grandTotal {
-    return subtotal - _discount + gstAmount;
+    return _items.fold(0.0, (sum, item) => sum + item.totalAmount);
   }
   
   /// Calculate balance due
@@ -91,9 +77,9 @@ class BillingCalculationProvider extends ChangeNotifier {
   
   /// Get payment status
   String get paymentStatus {
-    if (_advancePayment >= grandTotal) return 'Paid';
-    if (_advancePayment > 0) return 'Partially Paid';
-    return 'Unpaid';
+    if (_advancePayment >= grandTotal) return 'paid';
+    if (_advancePayment > 0) return 'partial';
+    return 'unpaid';
   }
 
   /// Add a new item to the invoice
@@ -101,34 +87,34 @@ class BillingCalculationProvider extends ChangeNotifier {
     required String productName,
     InvoiceItemType type = InvoiceItemType.measurement,
     String? size,
-    double mrp = 0.0,
+    double rate = 0.0,
     int quantity = 0,
-    double? totalQuantity, // For direct items
-    double squareFeet = 0.0, // Length
+    double? totalLength, // For direct items
+    double length = 0.0, // Length
   }) {
-    double finalSqFt = squareFeet;
-    double finalTotalQty = 0.0;
+    double finalLength = length;
+    double finalTotalLength = 0.0;
 
     if (type == InvoiceItemType.measurement) {
         // Size string (HxW) is just informational now.
-        // finalSqFt is taken directly from arguments.
-        finalTotalQty = InvoiceItemEntity.calculateTotalQuantity(finalSqFt, quantity);
+        // finalLength is taken directly from arguments.
+        finalTotalLength = InvoiceItemEntity.calculateTotalLength(finalLength, quantity);
     } else {
        // Direct
-       finalTotalQty = totalQuantity ?? 1.0;
+       finalTotalLength = totalLength ?? 1.0;
     }
 
-    final totalAmount = InvoiceItemEntity.calculateTotalAmount(mrp, finalTotalQty);
+    final totalAmount = InvoiceItemEntity.calculateTotalAmount(rate, finalTotalLength);
 
     final item = InvoiceItemEntity(
       id: const Uuid().v4(),
       productName: productName,
       type: type,
       size: size ?? '',
-      squareFeet: finalSqFt,
+      length: finalLength,
       quantity: quantity,
-      totalQuantity: finalTotalQty,
-      mrp: mrp,
+      totalLength: finalTotalLength,
+      rate: rate,
       totalAmount: totalAmount,
     );
 
@@ -149,32 +135,26 @@ class BillingCalculationProvider extends ChangeNotifier {
     int index, {
     String? productName,
     String? size,
-    double? squareFeet,
+    double? length,
     int? quantity,
-    double? totalQuantity,
-    double? mrp,
+    double? totalLength,
+    double? rate,
     double? totalAmount,
   }) {
     if (index < 0 || index >= _items.length) return;
 
     final item = _items[index];
 
-    // If size changed, no longer recalculate squareFeet (Length) 
-    // if (item.type == InvoiceItemType.measurement && size != null && size != item.size) {
-    //   squareFeet = InvoiceItemEntity.calculateSquareFeetFromSize(size);
-    // }
-
-    // Use provided values or keep existing
-    final newSquareFeet = squareFeet ?? item.squareFeet;
+    // Recalculate if dimensions changed
+    final newLength = length ?? item.length;
     final newQuantity = quantity ?? item.quantity;
-    double effectiveMrp = mrp ?? item.mrp;
+    double effectiveRate = rate ?? item.rate;
 
     // Auto-fill Rate Logic:
-    // If dimensions (size/squareFeet) changed and Rate wasn't manually entered in this update,
+    // If dimensions (size/length) changed and Rate wasn't manually entered in this update,
     // check if any other item has the same dimensions and copy its Rate.
-    if (mrp == null && (size != null || squareFeet != null)) {
+    if (rate == null && (size != null || length != null)) {
        final effectiveSize = size ?? item.size;
-       final effectiveSqFt = squareFeet ?? item.squareFeet;
        
        // Search for a match in other items
        for (final otherItem in _items) {
@@ -186,44 +166,39 @@ class BillingCalculationProvider extends ChangeNotifier {
          if (effectiveSize.isNotEmpty && otherItem.size.isNotEmpty && effectiveSize == otherItem.size) {
            isMatch = true;
          } 
-         // Removed fallback to squareFeet to strictly enforce "Width and Height must be same"
 
-         if (isMatch && otherItem.mrp > 0) {
-           effectiveMrp = otherItem.mrp;
+         if (isMatch && otherItem.rate > 0) {
+           effectiveRate = otherItem.rate;
            break; // Found a match, stop
          }
        }
     }
 
-    final newMrp = effectiveMrp;
+    final newRate = effectiveRate;
 
     // Recalculate dependent fields if not manually overridden
-    double newTotalQuantity = totalQuantity ?? item.totalQuantity;
+    double newTotalLength = totalLength ?? item.totalLength;
     
-    // Auto-calc total quantity only if type is measurement AND totalQuantity wasn't explicitly passed
-    // Auto-calc total quantity only if type is measurement AND totalQuantity wasn't explicitly passed
-    if (item.type == InvoiceItemType.measurement && totalQuantity == null) {
-       // If Length (squareFeet) is > 0, we are in Length Mode: Force sync.
-       if (newSquareFeet > 0.001) {
-          newTotalQuantity = InvoiceItemEntity.calculateTotalQuantity(newSquareFeet, newQuantity);
+    // Auto-calc total length only if type is measurement AND totalLength wasn't explicitly passed
+    if (item.type == InvoiceItemType.measurement && totalLength == null) {
+       // If Length (newLength) is > 0, we are in Length Mode: Force sync.
+       if (newLength > 0.001) {
+          newTotalLength = InvoiceItemEntity.calculateTotalLength(newLength, newQuantity);
        } else {
           // Length is 0.
           // If dimensions were explicitly changed, respect the formula (which gives 0).
           // If dimensions were NOT changed (e.g. Rate update), preserve existing Total Length (Manual Mode).
-          bool dimensionsChanged = (squareFeet != null || quantity != null);
+          bool dimensionsChanged = (length != null || quantity != null);
           if (dimensionsChanged) {
-             newTotalQuantity = InvoiceItemEntity.calculateTotalQuantity(newSquareFeet, newQuantity);
+             newTotalLength = InvoiceItemEntity.calculateTotalLength(newLength, newQuantity);
           } else {
-             newTotalQuantity = item.totalQuantity;
+             newTotalLength = item.totalLength;
           }
        }
     } 
-    // For direct/service items, totalQuantity is either passed or remains same.
-    // If user passed a new quantity but not totalQuantity (weird case for direct), we might assume they mean totalQuantity?
-    // But for direct items, 'quantity' (pieces) is usually unused/irrelevant or 1.
     
     // Determine effective multiplier for Total Amount calculation
-    double multiplier = newTotalQuantity;
+    double multiplier = newTotalLength;
     if (multiplier <= 0.001) {
       if (newQuantity > 0) {
         multiplier = newQuantity.toDouble();
@@ -233,15 +208,15 @@ class BillingCalculationProvider extends ChangeNotifier {
       }
     }
 
-    final newTotalAmount = totalAmount ?? (newMrp * multiplier);
+    final newTotalAmount = totalAmount ?? (newRate * multiplier);
 
     _items[index] = item.copyWith(
       productName: productName,
       size: size,
-      squareFeet: newSquareFeet,
+      length: newLength,
       quantity: newQuantity,
-      totalQuantity: newTotalQuantity,
-      mrp: newMrp,
+      totalLength: newTotalLength,
+      rate: newRate,
       totalAmount: newTotalAmount,
     );
 
@@ -256,17 +231,7 @@ class BillingCalculationProvider extends ChangeNotifier {
     }
   }
 
-  /// Set discount amount
-  void setDiscount(double value) {
-    _discount = value.clamp(0.0, subtotal);
-    notifyListeners();
-  }
 
-  /// Set GST percentage
-  void setGstPercentage(double value) {
-    _gstPercentage = value.clamp(0.0, 100.0);
-    notifyListeners();
-  }
   
   /// Set advance payment
   void setAdvancePayment(double value) {
@@ -330,13 +295,9 @@ class BillingCalculationProvider extends ChangeNotifier {
   
   /// Generate invoice number
   void generateInvoiceNumber({int? nextNumber}) {
-    if (nextNumber != null) {
-      _invoiceNumber = 'BILL-$nextNumber';
-    } else {
-      // Fallback or initial dev state
-      final now = DateTime.now();
-      _invoiceNumber = 'BILL-${now.millisecondsSinceEpoch.toString().substring(8)}'; 
-    }
+    // User requested UUID auto-generation instead of BILL- prefix
+    // We use a short 8-character unique alphanumeric string for readability
+    _invoiceNumber = const Uuid().v4().substring(0, 8).toUpperCase();
     notifyListeners();
   }
   
@@ -367,8 +328,6 @@ class BillingCalculationProvider extends ChangeNotifier {
   /// Clear all items and reset
   void clear() {
     _items.clear();
-    _discount = 0.0;
-    _gstPercentage = 0.0;
     _advancePayment = 0.0;
     _invoiceNumber = '';
     _invoiceDate = DateTime.now();
@@ -387,10 +346,8 @@ class BillingCalculationProvider extends ChangeNotifier {
   }
 
   /// Load existing items (for editing invoice)
-  void loadItems(List<InvoiceItemEntity> items, {double? discount, double? gstPercentage}) {
+  void loadItems(List<InvoiceItemEntity> items) {
     _items = List.from(items);
-    _discount = discount ?? 0.0;
-    _gstPercentage = gstPercentage ?? 0.0;
     notifyListeners();
   }
 }

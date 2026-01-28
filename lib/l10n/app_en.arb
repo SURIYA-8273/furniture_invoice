@@ -4,12 +4,14 @@
   "@appName": {
     "description": "The application name"
   },
+  "appSubtitle": "Production-Ready Billing Software",
   
   "home": "Home",
   "customers": "Customers",
   "addCustomer": "Add Customer",
   "editCustomer": "Edit Customer",
   "customerName": "Customer Name",
+  "enterCustomerName": "Enter customer name",
   "phoneNumber": "Phone Number",
   "email": "Email",
   "address": "Address",
@@ -45,7 +47,7 @@
   "editCustomer": "Edit Customer",
   "customerDetails": "Customer Details",
   "customerList": "Customer List",
-  
+  "itemName": "Item Name",
   "productName": "Product Name",
   "productPrice": "Price",
   "productSize": "Size",
@@ -59,6 +61,21 @@
   "addYourFirstProduct": "Add your first product to get started",
   "size": "Size",
   "description": "Description",
+  "descriptions": "Descriptions",
+  "manageDescriptions": "Manage Descriptions",
+  "addDescription": "Add Description",
+  "editDescription": "Edit Description",
+  "deleteDescription": "Delete Description",
+  "noDescriptionsYet": "No descriptions added yet",
+  "enterDescriptionText": "Enter description text",
+  "deleteDescriptionConfirmation": "Are you sure you want to delete \"{text}\"?",
+  "@deleteDescriptionConfirmation": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
   "category": "Category",
   "enterProductName": "Enter product name",
   "enterDescription": "Enter description",
@@ -66,7 +83,7 @@
   "enterSize": "Enter size (e.g., 3×5, 4×6)",
   "enterCategory": "Enter category",
   "productNameRequired": "Product name is required",
-  "mrpRequired": "MRP is required",
+  "rateRequired": "Rate is required",
   "invalidMRP": "Invalid MRP. Must be greater than 0",
   "productAddedSuccessfully": "Product added successfully",
   "productUpdatedSuccessfully": "Product updated successfully",
@@ -84,9 +101,9 @@
   
   "serialNumber": "S.No",
   "quantity": "Quantity",
-  "squareFeet": "Square Feet",
-  "totalQuantity": "Total Quantity",
-  "mrp": "MRP",
+  "length": "Length",
+  "totalLength": "Total Length",
+  "rate": "Rate",
   "amount": "Amount",
   "totalAmount": "Total Amount",
   "subtotal": "Subtotal",
@@ -94,6 +111,40 @@
   "grandTotal": "Grand Total",
   "paidAmount": "Paid Amount",
   "balanceAmount": "Balance Amount",
+  "remainingBalance": "Remaining Balance",
+  "editBillAndPayment": "Edit Bill & Payment",
+  "paymentHistory": "Payment History",
+  "noPreviousPayments": "No previous payments",
+  "enterPaymentAmount": "Enter Payment Amount",
+  "updatePayment": "Update Payment",
+  "paymentUpdatedSuccessfully": "Payment updated and saved successfully!",
+  "shareInvoice": "Share Invoice",
+  "whatsappNumberOptional": "WhatsApp Number (Optional)",
+  "send": "Send",
+  "businessProfileMissing": "Business Profile Missing",
+  "businessProfileSetupMessage": "Please set up your business profile (Name, Address, Logo) in Settings before generating invoices.",
+  "businessNameTamil": "Business Name (Tamil)",
+  "businessAddressTamil": "Address (Tamil)",
+  "selectLanguage": "Select Language",
+  "languageSelection": "Language Selection",
+  "pdfGeneratedAt": "PDF Generated at {path}",
+  "length": "Length",
+  "totalLength": "Total Length",
+  "invoicePreview": "Invoice Preview",
+  "shareViaWhatsApp": "Share via WhatsApp",
+  "backToDashboard": "BACK TO DASHBOARD",
+  "newBill": "New Bill",
+  "generateBill": "Generate Bill",
+  "allDataCleared": "All data cleared",
+  "pleaseAddItems": "Please add at least one item to the bill",
+  "addItem": "Add Item",
+  "next": "Next",
+  "balanceDue": "Balance Due",
+  "desc": "Desc",
+  "noItemsAdded": "No items added",
+  "clearAllDataQuestion": "Clear All Data?",
+  "clearAllDataWarning": "This will reset all billing items and payment details. This action cannot be undone.",
+  "clearAllAction": "Clear All",
   
   "paymentMode": "Payment Mode",
   "paymentDate": "Payment Date",
@@ -151,6 +202,107 @@
   "backupNow": "Backup Now",
   "restoreFromBackup": "Restore from Backup",
   
+  "general": "General",
+  "darkModeEnabled": "Dark Mode Enabled",
+  "lightModeEnabled": "Light Mode Enabled",
+  "business": "Business",
+  "manageBusinessDetails": "Manage your business details",
+  "data": "Data",
+  "backupYourData": "Backup your data",
+  "backupFeatureComingSoon": "Backup feature coming soon",
+  "restoreFeatureComingSoon": "Restore feature coming soon",
+  "about": "About",
+  "version": "Version",
+  "appVersion": "1.0.0",
+  "backupSettings": "Backup & Restore",
+  "connectionStatus": "Cloud Connection",
+  "connectedToSupabase": "Connected to Cloud",
+  "notConnected": "Not connected",
+  "supabaseNotConfigured": "Cloud Backup Not Configured",
+  "testConnection": "Test Connection",
+  "manualBackup": "Manual Cloud Backup",
+  "manualBackupDescription": "Backup your bills and payment data to the secure cloud manually.",
+  "automaticBackup": "Automatic Cloud Backup",
+  "automaticBackupDescription": "Your data is automatically backed up to the cloud daily at 12:00 AM.",
+  "enableAutomaticBackup": "Enable Automatic Backup",
+  "backupTime": "Backup Time",
+  "dailyBackupTime": "Daily Backup Time",
+  "lastBackup": "Last backup: {time}",
+  "lastImport": "Last restore: {time}",
+  "automaticImport": "Automatic Restore",
+  "automaticImportDescription": "Your data is automatically restored from the cloud daily at 1:00 AM.",
+  "enableAutomaticImport": "Enable Automatic Restore",
+  "dailyImportTime": "Daily Restore Time",
+  "aboutImport": "About Restore",
+  "aboutImportDescription": "Data is automatically restored from the cloud to ensure all devices are in sync.",
+  "@lastBackup": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutBackups": "About Backups",
+  "aboutBackupsDescription": "Your data is securely backed up to cloud storage. Both new and updated bills are automatically synced.",
+  "startingBackup": "Starting backup...",
+  "backupSuccessful": "Backup Successful",
+  "dataBackedUpSuccessfully": "Your data has been backed up successfully!",
+  "billsSynced": "Bills synced:",
+  "billsFailed": "Bills failed:",
+  "paymentsSynced": "Payments synced:",
+  "paymentsFailed": "Payments failed:",
+  "ok": "OK",
+  "importFromSupabase": "Restore from Cloud",
+  "importFromSupabaseDescription": "Fetch all bills and payments from the cloud and save them locally.",
+  "importNow": "Restore Now",
+  "importFromCloudConfirmTitle": "Restore from Cloud?",
+  "importFromCloudConfirmMessage": "This will fetch all data from the cloud and merge it with your local data.",
+  "importSuccessful": "Restore Successful",
+  "dataImportedSuccessfully": "Data successfully restored from cloud.",
+  "billsRestored": "Bills Restored",
+  "paymentsRestored": "Payments Restored",
+  "importFailed": "Restore Failed",
+  "importError": "Restore Error",
+  "excelSyncSettings": "Excel Report Settings",
+  "enableExcelSync": "Enable Weekly Excel Report",
+  "excelSyncDescription": "Automatically export data to an Excel file in your Documents folder.",
+  "syncFrequency": "Export Frequency",
+  "everyDays": "Every {days} days",
+  "manualExcelSync": "Manual Excel Export",
+  "manualExcelSyncDescription": "Export your data to an Excel file immediately.",
+  "exportNow": "Export Now",
+  "exporting": "Exporting...",
+  "excelSyncStatus": "Excel Export Status",
+  "lastExport": "Last export: {time}",
+  "noExportHistory": "No export history available",
+  "excelExportSuccess": "Excel Export Successful",
+  "excelExportSuccessMessage": "Data exported to Documents/FurnitureBillingData",
+  "excelExportFailed": "Excel Export Failed",
+  "backupToCloudConfirmTitle": "Backup to Cloud?",
+  "backupToCloudConfirmMessage": "This will backup all your data to the cloud.",
+  "exitConfirmationTitle": "Exit?",
+  "exitConfirmationMessage": "Are you sure you want to go back?",
+  "exitApp": "Exit App?",
+  "exitAppConfirmation": "Are you sure you want to exit the application?",
+  "exit": "Exit",
+  "connectedSuccessfully": "Connected successfully ({latency}ms)",
+  "@connectedSuccessfully": {
+    "placeholders": {
+      "latency": {
+        "type": "String"
+      }
+    }
+  },
+  "connectionFailed": "Connection failed: {message}",
+  "@connectionFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "backupFailed": "Backup Failed",
+  "backupError": "Backup Error",
   "generatePdf": "Generate PDF",
   "shareOnWhatsapp": "Share on WhatsApp",
   "customerDetailsRequired": "Customer details required to generate PDF",
@@ -223,12 +375,151 @@
   "thisWeek": "This Week",
   "thisMonth": "This Month",
   "custom": "Custom",
+  "totalBills": "Total Bills",
+  "unpaidBills": "Unpaid Bills",
   "noReportsData": "No data available for the selected period",
   "clearAll": "Clear All",
   "clearAllConfirmation": "Are you sure you want to clear all items?",
   "tapToAddItems": "Tap + to add items",
   "width": "Width",
   "height": "Height",
-  "deleteItemConfirmation": "Are you sure you want to delete this item?"
+  "deleteItemConfirmation": "Are you sure you want to delete this item?",
+  
+  "billNo": "BILL NO",
+  "date": "DATE",
+  "customer": "CUS",
+  "total": "TOTAL",
+  "due": "DUE",
+  "newBill": "NEW BILL",
+  "billPayments": "Bill Payments",
+  "unpaidPartial": "Unpaid/Partial",
+  "searchBillNumber": "Search bill number",
+  "noInvoicesFound": "No invoices found",
+  "deleteBill": "Delete Bill",
+  "deleteBillConfirmation": "Are you sure you want to delete Bill #{number}? This action cannot be undone.",
+  "@deleteBillConfirmation": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "billDeletedSuccessfully": "Bill deleted successfully",
+  "failedToDeleteBill": "Failed to delete bill",
+  "addItem": "ADD ITEM",
+  "next": "NEXT",
+  "reviewAndSave": "REVIEW & SAVE",
+  "reviewAndFinalize": "Review & Finalize",
+  "billGenerated": "Bill Generated",
+  "billSavedSuccessfully": "Bill Saved Successfully",
+  "confirmAndGenerate": "CONFIRM & GENERATE",
+  "invoiceGeneratedAndSaved": "Invoice Generated & Saved Successfully!",
+  "invoiceUpdatedSuccessfully": "Invoice Updated Successfully!",
+  "failedToSaveInvoice": "Failed to save invoice",
+  "editBillAndPayment": "Edit Bill & Payment",
+  "updatePayment": "Update Payment",
+  "enterPaymentAmount": "Enter Payment Amount",
+  "paymentUpdatedSuccessfully": "Payment updated and saved successfully!",
+  "maxPaymentError": "Max: {amount}",
+  "@maxPaymentError": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "clearAllData": "Clear All Data?",
+  "clearAllDataConfirmation": "This will reset all billing items and payment details. This action cannot be undone.",
+  "clearAll": "CLEAR ALL",
+  "allDataCleared": "All data cleared",
+  "billSummary": "BILL SUMMARY",
+  "remainingBalance": "REMAINING BALANCE",
+  "advancePaid": "Advance Paid",
+  "pending": "PENDING",
+  "partial": "PARTIAL",
+  "length": "LEN",
+  "qty": "QTY",
+  "rate": "RATE",
+  "totLen": "TOT.LEN",
+  "noPreviousPayments": "No previous payments",
+  "thankYouMessage": "Thank you for your business!",
+  "enterWhatsappNumberHint": "Enter WhatsApp number to send directly, or leave empty to select a chat.",
+  "nameLabel": "NAME",
+  "dateLabel": "DATE",
+  "phoneLabel": "Phone",
+  "descriptionShort": "DESCRIPTION",
+  "lengthShort": "LENGTH",
+  "qtyShort": "QTY",
+  "totalLenShort": "TOT.LEN",
+  "rateShort": "RATE",
+  "totalShort": "TOTAL",
+  "balanceDueUpper": "BALANCE DUE",
+  "defaultBusinessName": "BUSINESS NAME",
+  "whatsappNumberHintExample": "e.g., 9876543210",
+  "billNumberPrefix": "BILL #",
+  "totalAmountCaps": "TOTAL AMOUNT",
+  "initialPaymentNote": "Initial payment for bill {number}",
+  "@initialPaymentNote": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSaveInvoiceWithDetail": "Failed to save invoice: {error}",
+  "@failedToSaveInvoiceWithDetail": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "internetConnectionFailed": "Internet connection failed. Please check your data or Wi-Fi connection and try again.",
+  "connectionTimeout": "The connection timed out. Please try again when you have a better network.",
+  "cloudConnectionError": "Could not connect to the cloud server. Please try again in a few minutes.",
+  "paymentHistoryNote": "Payment for Invoice #{number}",
+  "supabaseCredentialsMissing": "Supabase credentials not found",
+  "configureSupabaseMessage": "Please configure your Supabase credentials in the app settings.",
+  "unknownError": "Unknown error",
+  "initializingBackup": "Initializing backup...",
+  "backingUpBills": "Backing up bills...",
+  "backingUpPayments": "Backing up payments...",
+  "fetchingBills": "Fetching bills from cloud...",
+  "fetchingPayments": "Fetching payments from cloud...",
+  "checkingDeleted": "Checking for deleted records...",
+  "removingDeleted": "Removing deleted records locally...",
+  "restoringBill": "Restoring bill {current}/{total}...",
+  "@restoringBill": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "restoringPayment": "Restoring payment {current}/{total}...",
+  "@restoringPayment": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "restorationCompleted": "Restoration completed!",
+  "backupCompleted": "Backup completed!",
+  "noInternetConnection": "No internet connection",
+  "supabaseNotInitialized": "Supabase not initialized",
+  "checkingConnectionProgress": "Checking connection...",
+  "backingUpBill": "Backing up bill {current}/{total}...",
+  "@backingUpBill": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "backingUpPayment": "Backing up payment {current}/{total}...",
+  "@backingUpPayment": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  }
 }
 

@@ -18,15 +18,6 @@ class InvoiceModel extends HiveObject {
   @HiveField(2)
   final List<InvoiceItemModel> items;
 
-  @HiveField(3)
-  final double subtotal;
-
-  @HiveField(4)
-  final double discount;
-
-  @HiveField(5)
-  final double gst;
-
   @HiveField(6)
   final double grandTotal;
 
@@ -53,9 +44,6 @@ class InvoiceModel extends HiveObject {
     required this.invoiceNumber,
     this.customerName,
     required this.items,
-    required this.subtotal,
-    this.discount = 0.0,
-    this.gst = 0.0,
     required this.grandTotal,
     this.paidAmount = 0.0,
     required this.balanceAmount,
@@ -71,9 +59,6 @@ class InvoiceModel extends HiveObject {
       invoiceNumber: entity.invoiceNumber,
       customerName: entity.customerName,
       items: entity.items.map((e) => InvoiceItemModel.fromEntity(e)).toList(),
-      subtotal: entity.subtotal,
-      discount: entity.discount,
-      gst: entity.gst,
       grandTotal: entity.grandTotal,
       paidAmount: entity.paidAmount,
       balanceAmount: entity.balanceAmount,
@@ -90,9 +75,6 @@ class InvoiceModel extends HiveObject {
       invoiceNumber: invoiceNumber,
       customerName: customerName,
       items: items.map((e) => e.toEntity()).toList(),
-      subtotal: subtotal,
-      discount: discount,
-      gst: gst,
       grandTotal: grandTotal,
       paidAmount: paidAmount,
       balanceAmount: balanceAmount,
@@ -109,9 +91,6 @@ class InvoiceModel extends HiveObject {
       'invoiceNumber': invoiceNumber,
       'customerName': customerName,
       'items': items.map((e) => e.toJson()).toList(),
-      'subtotal': subtotal,
-      'discount': discount,
-      'gst': gst,
       'grandTotal': grandTotal,
       'paidAmount': paidAmount,
       'balanceAmount': balanceAmount,
@@ -128,9 +107,6 @@ class InvoiceModel extends HiveObject {
       invoiceNumber: json['invoiceNumber'] as String,
       customerName: json['customerName'] as String?,
       items: (json['items'] as List).map((e) => InvoiceItemModel.fromJson(e)).toList(),
-      subtotal: (json['subtotal'] as num).toDouble(),
-      discount: (json['discount'] as num?)?.toDouble() ?? 0.0,
-      gst: (json['gst'] as num?)?.toDouble() ?? 0.0,
       grandTotal: (json['grandTotal'] as num).toDouble(),
       paidAmount: (json['paidAmount'] as num?)?.toDouble() ?? 0.0,
       balanceAmount: (json['balanceAmount'] as num).toDouble(),

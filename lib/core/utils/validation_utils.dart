@@ -49,6 +49,14 @@ class ValidationUtils {
     return null;
   }
 
+  /// Validate required field with dynamic field name
+  static String? validateRequired(String? value, String fieldName) {
+    if (value == null || value.trim().isEmpty) {
+      return '$fieldName is required';
+    }
+    return null;
+  }
+
   /// Validate URL
   static String? validateUrl(String? value, {bool required = false}) {
     if (value == null || value.trim().isEmpty) {

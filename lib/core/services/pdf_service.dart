@@ -1,12 +1,14 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart'; // For debugPrint
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart'; // For PdfGoogleFonts
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import '../utils/tamil_print_utils.dart';
 import '../../domain/entities/invoice_entity.dart';
 import '../../domain/entities/business_profile_entity.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Service for generating PDF invoices
 class PdfService {
@@ -17,6 +19,7 @@ class PdfService {
   Future<File> generateInvoicePdf({
     required InvoiceEntity invoice,
     required BusinessProfileEntity businessProfile,
+    required AppLocalizations l10n,
   }) async {
     final pdf = pw.Document();
 
@@ -39,52 +42,79 @@ class PdfService {
        }
     }
 
-    // Load Font (with fallback)
-    pw.ThemeData theme;
+    // Load Header Icon (Optional/Permanent)
+    pw.MemoryImage? headerIcon;
     try {
-      theme = pw.ThemeData.withFont(
-        base: await PdfGoogleFonts.notoSansDevanagariRegular(),
-        bold: await PdfGoogleFonts.notoSansDevanagariBold(),
-      );
+      final headerIconBytes = await rootBundle.load('assets/images/invoice_header_icon.jpg');
+      headerIcon = pw.MemoryImage(headerIconBytes.buffer.asUint8List());
     } catch (e) {
-      debugPrint('Error loading Google Fonts: $e');
-      // Fallback to default font (might miss Rupee symbol but won't crash)
-      theme = pw.ThemeData.withFont(
-        base: pw.Font.courier(),
-        bold: pw.Font.courierBold(),
-      );
+      debugPrint('Error loading header icon: $e');
     }
 
+    // Load Font (with fallback)
+    pw.ThemeData theme;
+    pw.Font? tamilFont; // Declare outside try block
+    
+    try {
+      final isTamil = l10n.localeName == 'ta';
+      
+      // Always load Custom Tamil Font (Legacy Encoding)
+      final fontData = await rootBundle.load('assets/fonts/custom_Anand_MuktaMalar.ttf');
+      tamilFont = pw.Font.ttf(fontData);
+
+      if (isTamil) {
+        theme = pw.ThemeData.withFont(
+          base: tamilFont,
+          bold: tamilFont,
+        );
+      } else {
+        // Default Google Font for English with Tamil Fallback
+        final font = await PdfGoogleFonts.notoSansRegular();
+        final fontBold = await PdfGoogleFonts.notoSansBold();
+        theme = pw.ThemeData.withFont(
+          base: font,
+          bold: fontBold,
+          fontFallback: [tamilFont],
+        );
+      }
+    } catch (e) {
+      debugPrint('Error loading fonts: $e');
+      // Fallback to default font
+      theme = pw.ThemeData.withFont(base: await PdfGoogleFonts.notoSansRegular());
+    }
+
+    final pageTheme = pw.PageTheme(
+      theme: theme,
+      pageFormat: PdfPageFormat.a4,
+      margin: const pw.EdgeInsets.all(32),
+      buildBackground: profileImage != null ? (pw.Context context) => _buildWatermark(profileImage!) : null,
+    );
+
     pdf.addPage(
-      pw.Page(
-        theme: theme,
-        pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.all(32),
+      pw.MultiPage(
+        pageTheme: pageTheme,
         build: (pw.Context context) {
-          return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              // Header
-              _buildHeader(businessProfile, profileImage),
-              pw.SizedBox(height: 5),
-              pw.Divider(),
-              pw.SizedBox(height: 5),
+          return [
+            // Header
+            _buildHeader(businessProfile, profileImage, headerIcon, l10n),
+            pw.SizedBox(height: 1),
+            pw.Divider(),
+            pw.SizedBox(height: 1),
 
-              // Invoice Details
-              _buildInvoiceDetails(invoice),
-              pw.SizedBox(height: 5),
+            // Invoice Details
+            _buildInvoiceDetails(invoice, l10n, tamilFont ?? theme.defaultTextStyle.font!),
+            pw.SizedBox(height: 3),
 
-              // Items Table
-              _buildItemsTable(invoice),
-              pw.SizedBox(height: 5),
+            // Items Table
+            _buildItemsTable(invoice, l10n, tamilFont ?? theme.defaultTextStyle.font!),
+            pw.SizedBox(height: 5),
 
-              // Totals
-              _buildTotals(invoice),
-              pw.Spacer(),
-
-              
-            ],
-          );
+            // Totals
+            _buildTotals(invoice, l10n),
+            
+            // Thank you note (appears after all items)
+            _buildThankYouNote(l10n),
+          ];
         },
       ),
     );
@@ -101,9 +131,10 @@ class PdfService {
   Future<File> generateInvoiceImage({
     required InvoiceEntity invoice,
     required BusinessProfileEntity businessProfile,
+    required AppLocalizations l10n,
   }) async {
     // 1. Generate PDF document (in memory)
-    final pdfFile = await generateInvoicePdf(invoice: invoice, businessProfile: businessProfile);
+    final pdfFile = await generateInvoicePdf(invoice: invoice, businessProfile: businessProfile, l10n: l10n);
     final pdfBytes = await pdfFile.readAsBytes();
 
     // 2. Rasterize first page to Image
@@ -127,140 +158,193 @@ class PdfService {
     return pdfFile; // Fallback to PDF if image gen fails (better than nothing)
   }
 
-  pw.Widget _buildHeader(BusinessProfileEntity business, pw.MemoryImage? logo) {
+  pw.Widget _buildHeader(BusinessProfileEntity business, pw.MemoryImage? logo, pw.MemoryImage? headerIcon, AppLocalizations l10n) {
+    final isTamil = l10n.localeName == 'ta';
+    final name = isTamil && business.businessNameTamil != null && business.businessNameTamil!.isNotEmpty
+        ? business.businessNameTamil!
+        : business.businessName;
+    final address = isTamil && business.businessAddressTamil != null && business.businessAddressTamil!.isNotEmpty
+        ? business.businessAddressTamil!
+        : (business.businessAddress ?? '');
+
     return pw.SizedBox(
       width: double.infinity,
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.center,
         children: [
+          if (headerIcon != null)
+            pw.Container(
+              width: 20,
+              height: 20,
+              child: pw.Image(headerIcon),
+            ),
           if (logo != null)
             pw.Container(
-              width: 80,
-              height: 80,
-              margin: const pw.EdgeInsets.only(bottom: 10),
+              width: 60,
+              height: 60,
               child: pw.Image(logo),
             ),
-        pw.Text(
-          business.businessName.toUpperCase(),
-          style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
+        
+        pw.RichText(
+          text: pw.TextSpan(
+            style:isTamil ? const pw.TextStyle(lineSpacing: -2) : const pw.TextStyle(lineSpacing: -1), // Even tighter vertical spacing
+            children: [
+              pw.TextSpan(
+                text: '${name.toPrintPdf}\n',
+                style: pw.TextStyle(
+                  fontSize: 18, 
+                  fontWeight: pw.FontWeight.bold, 
+                  color: PdfColors.brown800,
+                ),
+              ),
+              if (business.primaryPhone != null)
+                pw.TextSpan(
+                  text: '${l10n.phoneLabel.toPrintPdf}: ${business.primaryPhone!}\n',
+                  style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
+                ),
+              if (address.isNotEmpty)
+                pw.TextSpan(
+                  text: address.toPrintPdf,
+                  style: const pw.TextStyle(fontSize: 10),
+                ),
+            ],
+          ),
           textAlign: pw.TextAlign.center,
         ),
-        if (business.primaryPhone != null) ...[
-          pw.SizedBox(height: 5),
-          pw.Text('Phone: ${business.primaryPhone}', style: const pw.TextStyle(fontSize: 10)),
-        ],
-        if (business.businessAddress != null) ...[
-          pw.SizedBox(height: 5),
-          pw.Text(business.businessAddress!, style: const pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
-        ],
        
       ],
       ),
     );
   }
 
-  pw.Widget _buildInvoiceDetails(InvoiceEntity invoice) {
+  pw.Widget _buildInvoiceDetails(InvoiceEntity invoice, AppLocalizations l10n, pw.Font tamilFont) {
     return pw.Container(
-      padding: const pw.EdgeInsets.symmetric(horizontal: 24.0, vertical: 2),
+      padding: const pw.EdgeInsets.symmetric(horizontal: 24.0, vertical: 0),
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
           pw.Text(
-            'NAME : ${invoice.customerName ?? '-'}',
+            '${l10n.nameLabel.toPrintPdf} : ${invoice.customerName?.toPrintPdf ?? '-'}',
             style: pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
               fontSize: 16,
               color: PdfColors.black,
+              font: tamilFont, // Use Tamil font for user content name
             ),
             textAlign: pw.TextAlign.center,
           ),
-          pw.Text(
-            'DATE : ${_formatDate(invoice.invoiceDate)}',
-            style: pw.TextStyle(
-              fontWeight: pw.FontWeight.bold,
-              fontSize: 14,
-              color: PdfColors.black,
-            ),
-            textAlign: pw.TextAlign.center,
+          pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.end,
+            children: [
+              pw.Text(
+                '${l10n.dateLabel.toPrintPdf} : ${_formatDate(invoice.invoiceDate)}',
+                style: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  fontSize: 14,
+                  color: PdfColors.black,
+                ),
+                textAlign: pw.TextAlign.right,
+              ),
+            
+              pw.Text(
+                '${l10n.billNo.toPrintPdf} : ${invoice.invoiceNumber}',
+                style: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  fontSize: 14,
+                  color: PdfColors.black,
+                ),
+                textAlign: pw.TextAlign.right,
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  pw.Widget _buildItemsTable(InvoiceEntity invoice) {
+  pw.Widget _buildItemsTable(InvoiceEntity invoice, AppLocalizations l10n, pw.Font tamilFont) {
     return pw.Table(
-      border: pw.TableBorder.all(),
+      border: pw.TableBorder.all(color: PdfColors.brown200, width: 0.5),
       columnWidths: {
-        0: const pw.FlexColumnWidth(4), // Description
+        0: const pw.FlexColumnWidth(2), // Description
         1: const pw.FlexColumnWidth(1), // Length
         2: const pw.FlexColumnWidth(1), // Qty
         3: const pw.FlexColumnWidth(1), // Total Length
         4: const pw.FlexColumnWidth(1), // Rate
-        5: const pw.FlexColumnWidth(2), // Total
+        5: const pw.FlexColumnWidth(1), // Total
       },
       children: [
         // Header
         pw.TableRow(
-          decoration: pw.BoxDecoration(color: PdfColors.grey300),
+          decoration: const pw.BoxDecoration(color: PdfColors.brown),
           children: [
-            _buildTableCell('DESCRIPTION', isHeader: true),
-            _buildTableCell('LENGTH', isHeader: true, align: pw.TextAlign.center),
-            _buildTableCell('QTY', isHeader: true, align: pw.TextAlign.center),
-            _buildTableCell('TOT.LEN', isHeader: true, align: pw.TextAlign.center),
-            _buildTableCell('RATE', isHeader: true, align: pw.TextAlign.right),
-            _buildTableCell('TOTAL', isHeader: true, align: pw.TextAlign.right),
+            _buildTableCell(l10n.descriptionShort.toPrintPdf, isHeader: true, headerTextColor: PdfColors.white),
+            _buildTableCell(l10n.lengthShort.toPrintPdf, isHeader: true, align: pw.TextAlign.center, headerTextColor: PdfColors.white),
+            _buildTableCell(l10n.qtyShort.toPrintPdf, isHeader: true, align: pw.TextAlign.center, headerTextColor: PdfColors.white),
+            _buildTableCell(l10n.totalLenShort.toPrintPdf, isHeader: true, align: pw.TextAlign.center, headerTextColor: PdfColors.white),
+            _buildTableCell(l10n.rateShort.toPrintPdf, isHeader: true, align: pw.TextAlign.right, headerTextColor: PdfColors.white),
+            _buildTableCell(l10n.totalShort.toPrintPdf, isHeader: true, align: pw.TextAlign.right, headerTextColor: PdfColors.white),
           ],
         ),
-        // Items
-        ...invoice.items.map((item) => pw.TableRow(
-              children: [
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(5),
-                  child: pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      pw.Text(item.productName, style: const pw.TextStyle(fontSize: 9)),
-                      if (item.size.isNotEmpty)
-                        pw.Text(item.size, style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700)),
-                    ],
-                  ),
+        // Items with alternating row colors
+        ...invoice.items.asMap().entries.map((entry) {
+          final index = entry.key;
+          final item = entry.value;
+          final isEvenRow = index % 2 == 0;
+          
+          return pw.TableRow(
+            decoration: pw.BoxDecoration(
+              color: isEvenRow ? PdfColors.orange50 : PdfColors.white,
+            ),
+            children: [
+              pw.Padding(
+                padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 2), // Reduced padding
+                child: pw.Text(
+                  '${item.productName}${item.size.isNotEmpty ? item.productName.isNotEmpty ? " - ${item.size}" : item.size : ""}'.toPrintPdf,
+                  style: pw.TextStyle(
+                      fontSize: 10, 
+                      lineSpacing: 1.0, 
+                      font: tamilFont // FORCE TAMIL FONT for Description
+                  ), 
                 ),
-                _buildTableCell(item.squareFeet == 0 ? '-' : item.squareFeet.toStringAsFixed(2), align: pw.TextAlign.center),
-                _buildTableCell(item.quantity == 0 ? '-' : item.quantity.toString(), align: pw.TextAlign.center),
-                _buildTableCell(item.totalQuantity == 0 ? '-' : item.totalQuantity.toStringAsFixed(2), align: pw.TextAlign.center),
-                _buildTableCell('₹${item.mrp.toStringAsFixed(2)}', align: pw.TextAlign.right),
-                _buildTableCell('₹${item.totalAmount.toStringAsFixed(2)}', align: pw.TextAlign.right),
-              ],
-            )),
+              ),
+              _buildTableCell(item.length == 0 ? '-' : item.length.toStringAsFixed(2), align: pw.TextAlign.center),
+              _buildTableCell(item.quantity == 0 ? '-' : item.quantity.toString(), align: pw.TextAlign.center),
+              _buildTableCell(item.totalLength == 0 ? '-' : item.totalLength.toStringAsFixed(2), align: pw.TextAlign.center),
+              _buildTableCell('\u20B9${item.rate.toStringAsFixed(2)}', align: pw.TextAlign.right),
+              _buildTableCell('\u20B9${item.totalAmount.toStringAsFixed(2)}', align: pw.TextAlign.right),
+            ],
+          );
+        }),
       ],
     );
   }
 
-  pw.Widget _buildTableCell(String text, {bool isHeader = false, pw.TextAlign align = pw.TextAlign.left}) {
+  pw.Widget _buildTableCell(String text, {bool isHeader = false, pw.TextAlign align = pw.TextAlign.left, PdfColor? headerTextColor}) {
     return pw.Padding(
-      padding: const pw.EdgeInsets.all(5),
+      padding: const pw.EdgeInsets.all(2),
       child: pw.Text(
         text,
         textAlign: align,
         style: pw.TextStyle(
           fontWeight: isHeader ? pw.FontWeight.bold : pw.FontWeight.normal,
           fontSize: isHeader ? 10 : 9,
+          color: isHeader && headerTextColor != null ? headerTextColor : PdfColors.black,
         ),
       ),
     );
   }
 
-  pw.Widget _buildTotals(InvoiceEntity invoice) {
+  pw.Widget _buildTotals(InvoiceEntity invoice, AppLocalizations l10n) {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.end,
       children: [
         
-        _buildTotalRow('Grand Total:', '₹${invoice.grandTotal.toStringAsFixed(2)}', isBold: true),
+        _buildTotalRow('${l10n.grandTotal.toPrintPdf}:', '\u20B9${invoice.grandTotal.toStringAsFixed(2)}', isBold: true),
         if (invoice.paidAmount > 0)
-          _buildTotalRow('Paid:', '₹${invoice.paidAmount.toStringAsFixed(2)}'),
+          _buildTotalRow('${l10n.paidAmount.toPrintPdf}:', '\u20B9${invoice.paidAmount.toStringAsFixed(2)}'),
         if (invoice.balanceAmount > 0)
-          _buildTotalRow('Balance:', '₹${invoice.balanceAmount.toStringAsFixed(2)}', isBold: true),
+          _buildTotalRow('${l10n.balanceAmount.toPrintPdf}:', '\u20B9${invoice.balanceAmount.toStringAsFixed(2)}', isBold: true),
       ],
     );
   }
@@ -286,20 +370,43 @@ class PdfService {
     );
   }
 
-  pw.Widget _buildFooter(BusinessProfileEntity business) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.center,
-      children: [
-        pw.Divider(),
-        pw.SizedBox(height: 10),
-        pw.Text('Thank you for your business!', style: pw.TextStyle(fontSize: 12)),
-        if (business.websiteUrl != null)
-          pw.Text(business.websiteUrl!, style: pw.TextStyle(fontSize: 10)),
-      ],
-    );
-  }
 
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  /// Build watermark with company logo
+  pw.Widget _buildWatermark(pw.MemoryImage logo) {
+    return pw.Center(
+      child: pw.Opacity(
+        opacity: 0.1,
+        child: pw.Container(
+          width: 350,
+          height: 350,
+          child: pw.Image(logo, fit: pw.BoxFit.contain),
+        ),
+      ),
+    );
+  }
+
+  /// Build thank you note at bottom of invoice
+  pw.Widget _buildThankYouNote(AppLocalizations l10n) {
+    return pw.Column(
+      children: [
+        pw.Divider(color: PdfColors.grey400),
+        pw.SizedBox(height: 12),
+        pw.Center(
+          child: pw.Text(
+            l10n.thankYouMessage.toPrintPdf,
+            style: pw.TextStyle(
+              fontSize: 18,
+              color: PdfColors.black,
+              lineSpacing: 2.0,
+              fontWeight: pw.FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

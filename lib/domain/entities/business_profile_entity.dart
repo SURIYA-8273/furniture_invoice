@@ -12,6 +12,8 @@ class BusinessProfileEntity {
   final String? websiteUrl; // Optional
   final String? gstNumber; // Optional
   final String? businessAddress; // Optional
+  final String? businessNameTamil; // Optional (Required in UI)
+  final String? businessAddressTamil; // Optional (Required in UI)
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -26,6 +28,8 @@ class BusinessProfileEntity {
     this.websiteUrl,
     this.gstNumber,
     this.businessAddress,
+    this.businessNameTamil,
+    this.businessAddressTamil,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -42,6 +46,8 @@ class BusinessProfileEntity {
     String? websiteUrl,
     String? gstNumber,
     String? businessAddress,
+    String? businessNameTamil,
+    String? businessAddressTamil,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -56,6 +62,8 @@ class BusinessProfileEntity {
       websiteUrl: websiteUrl ?? this.websiteUrl,
       gstNumber: gstNumber ?? this.gstNumber,
       businessAddress: businessAddress ?? this.businessAddress,
+      businessNameTamil: businessNameTamil ?? this.businessNameTamil,
+      businessAddressTamil: businessAddressTamil ?? this.businessAddressTamil,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -80,7 +88,9 @@ class BusinessProfileEntity {
         other.instagramId == instagramId &&
         other.websiteUrl == websiteUrl &&
         other.gstNumber == gstNumber &&
-        other.businessAddress == businessAddress;
+        other.businessAddress == businessAddress &&
+        other.businessNameTamil == businessNameTamil &&
+        other.businessAddressTamil == businessAddressTamil;
   }
 
   @override
@@ -94,6 +104,8 @@ class BusinessProfileEntity {
         instagramId.hashCode ^
         websiteUrl.hashCode ^
         gstNumber.hashCode ^
-        businessAddress.hashCode;
+        businessAddress.hashCode ^
+        businessNameTamil.hashCode ^
+        businessAddressTamil.hashCode;
   }
 }

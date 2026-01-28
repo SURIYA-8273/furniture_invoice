@@ -15,29 +15,33 @@ class InvoiceItemModel extends HiveObject {
   final String size;
 
   @HiveField(3)
-  final double squareFeet;
+  final double length;
 
   @HiveField(4)
   final int quantity;
 
   @HiveField(5)
-  final double totalQuantity;
+  final double totalLength;
 
   @HiveField(6)
-  final double mrp;
+  final double rate;
 
   @HiveField(7)
   final double totalAmount;
+
+  @HiveField(8)
+  final String? typeIndex; // measurement, direct
 
   InvoiceItemModel({
     required this.id,
     required this.productName,
     required this.size,
-    required this.squareFeet,
+    required this.length,
     required this.quantity,
-    required this.totalQuantity,
-    required this.mrp,
+    required this.totalLength,
+    required this.rate,
     required this.totalAmount,
+    this.typeIndex,
   });
 
   factory InvoiceItemModel.fromEntity(InvoiceItemEntity entity) {
@@ -45,11 +49,12 @@ class InvoiceItemModel extends HiveObject {
       id: entity.id,
       productName: entity.productName,
       size: entity.size,
-      squareFeet: entity.squareFeet,
+      length: entity.length,
       quantity: entity.quantity,
-      totalQuantity: entity.totalQuantity,
-      mrp: entity.mrp,
+      totalLength: entity.totalLength,
+      rate: entity.rate,
       totalAmount: entity.totalAmount,
+      typeIndex: entity.type.name,
     );
   }
 
@@ -58,11 +63,15 @@ class InvoiceItemModel extends HiveObject {
       id: id,
       productName: productName,
       size: size,
-      squareFeet: squareFeet,
+      length: length,
       quantity: quantity,
-      totalQuantity: totalQuantity,
-      mrp: mrp,
+      totalLength: totalLength,
+      rate: rate,
       totalAmount: totalAmount,
+      type: InvoiceItemType.values.firstWhere(
+        (e) => e.name == (typeIndex ?? 'measurement'),
+        orElse: () => InvoiceItemType.measurement,
+      ),
     );
   }
 
@@ -71,11 +80,12 @@ class InvoiceItemModel extends HiveObject {
       'id': id,
       'productName': productName,
       'size': size,
-      'squareFeet': squareFeet,
+      'length': length,
       'quantity': quantity,
-      'totalQuantity': totalQuantity,
-      'mrp': mrp,
+      'totalLength': totalLength,
+      'rate': rate,
       'totalAmount': totalAmount,
+      'type': typeIndex,
     };
   }
 
@@ -84,11 +94,12 @@ class InvoiceItemModel extends HiveObject {
       id: json['id'] as String,
       productName: json['productName'] as String,
       size: json['size'] as String,
-      squareFeet: (json['squareFeet'] as num).toDouble(),
+      length: (json['length'] as num).toDouble(),
       quantity: json['quantity'] as int,
-      totalQuantity: (json['totalQuantity'] as num).toDouble(),
-      mrp: (json['mrp'] as num).toDouble(),
+      totalLength: (json['totalLength'] as num).toDouble(),
+      rate: (json['rate'] as num).toDouble(),
       totalAmount: (json['totalAmount'] as num).toDouble(),
+      typeIndex: json['type'] as String? ?? 'measurement',
     );
   }
 }

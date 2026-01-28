@@ -1,26 +1,33 @@
+import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../../core/constants/hive_box_names.dart';
 import '../../domain/entities/invoice_entity.dart';
 import '../../domain/repositories/invoice_repository.dart';
 import '../models/invoice_model.dart';
+import '../models/payment_history_model.dart';
 
 /// Implementation of Invoice Repository using Hive.
 class InvoiceRepositoryImpl implements InvoiceRepository {
-  Box get _box => Hive.box(HiveBoxNames.invoices);
+  Box<InvoiceModel> get _box => Hive.box<InvoiceModel>(HiveBoxNames.invoices);
 
   @override
   Future<List<InvoiceEntity>> getAllInvoices() async {
     try {
       final invoices = _box.values
-          .cast<InvoiceModel>()
           .map((model) => model.toEntity())
           .toList();
 
-      // Sort by date (newest first)
-      invoices.sort((a, b) => b.invoiceDate.compareTo(a.invoiceDate));
+      // Sort by creation date (newest first) - source of truth for bill history
+      invoices.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
       return invoices;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('DEBUG: Error in getAllInvoices: $e');
+      debugPrint('DEBUG: StackTrace: $stackTrace');
+      debugPrint('Syncing all bills to Supabase...');
+      // Note: invoices.length is not available here as the try block failed.
+      // This line would cause an error if placed here.
+      // debugPrint('Found ${invoices.length} invoices in local storage');
       throw Exception('Failed to get invoices: $e');
     }
   }
@@ -28,7 +35,7 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
   @override
   Future<InvoiceEntity?> getInvoiceById(String id) async {
     try {
-      final model = _box.get(id) as InvoiceModel?;
+      final model = _box.get(id);
       return model?.toEntity();
     } catch (e) {
       throw Exception('Failed to get invoice: $e');
@@ -44,7 +51,6 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
 
       final lowerQuery = query.toLowerCase();
       final invoices = _box.values
-          .cast<InvoiceModel>()
           .where((model) {
             final numberMatch = model.invoiceNumber.toLowerCase().contains(lowerQuery);
             final nameMatch = model.customerName != null && model.customerName!.toLowerCase().contains(lowerQuery);
@@ -53,8 +59,8 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
           .map((model) => model.toEntity())
           .toList();
 
-      // Sort by date
-      invoices.sort((a, b) => b.invoiceDate.compareTo(a.invoiceDate));
+      // Sort by creation date
+      invoices.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
       return invoices;
     } catch (e) {
@@ -85,9 +91,21 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
   @override
   Future<void> deleteInvoice(String id) async {
     try {
+      // 1. Delete associated payments first
+      final paymentBox = Hive.box<PaymentHistoryModel>(HiveBoxNames.paymentHistory);
+      final paymentKeysToDelete = paymentBox.keys.where((key) {
+        final payment = paymentBox.get(key);
+        return payment?.invoiceId == id;
+      }).toList();
+      
+      for (var key in paymentKeysToDelete) {
+        await paymentBox.delete(key);
+      }
+      
+      // 2. Delete the invoice
       await _box.delete(id);
     } catch (e) {
-      throw Exception('Failed to delete invoice: $e');
+      throw Exception('Failed to delete invoice and its payments: $e');
     }
   }
 
@@ -95,13 +113,12 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
   Future<List<InvoiceEntity>> getUnpaidInvoices() async {
     try {
       final invoices = _box.values
-          .cast<InvoiceModel>()
           .map((model) => model.toEntity())
           .where((invoice) => invoice.hasPendingBalance)
           .toList();
 
-      // Sort by date
-      invoices.sort((a, b) => b.invoiceDate.compareTo(a.invoiceDate));
+      // Sort by creation date
+      invoices.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
       return invoices;
     } catch (e) {
@@ -113,7 +130,7 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
   Future<int> getNextInvoiceNumber() async {
     try {
       // Retrieve all invoices
-      final invoices = _box.values.cast<InvoiceModel>();
+      final invoices = _box.values;
 
       if (invoices.isEmpty) {
         return 1001; // Start from 1001
@@ -144,7 +161,7 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
   @override
   Future<InvoiceEntity?> getInvoiceByNumber(String invoiceNumber) async {
     try {
-      final invoices = _box.values.cast<InvoiceModel>();
+      final invoices = _box.values;
       try {
         final match = invoices.firstWhere(
             (model) => model.invoiceNumber == invoiceNumber);

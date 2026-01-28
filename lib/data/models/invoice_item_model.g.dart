@@ -20,18 +20,19 @@ class InvoiceItemModelAdapter extends TypeAdapter<InvoiceItemModel> {
       id: fields[0] as String,
       productName: fields[1] as String,
       size: fields[2] as String,
-      squareFeet: fields[3] as double,
+      length: fields[3] as double,
       quantity: fields[4] as int,
-      totalQuantity: fields[5] as double,
-      mrp: fields[6] as double,
+      totalLength: fields[5] as double,
+      rate: fields[6] as double,
       totalAmount: fields[7] as double,
+      typeIndex: fields[8] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, InvoiceItemModel obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -39,15 +40,17 @@ class InvoiceItemModelAdapter extends TypeAdapter<InvoiceItemModel> {
       ..writeByte(2)
       ..write(obj.size)
       ..writeByte(3)
-      ..write(obj.squareFeet)
+      ..write(obj.length)
       ..writeByte(4)
       ..write(obj.quantity)
       ..writeByte(5)
-      ..write(obj.totalQuantity)
+      ..write(obj.totalLength)
       ..writeByte(6)
-      ..write(obj.mrp)
+      ..write(obj.rate)
       ..writeByte(7)
-      ..write(obj.totalAmount);
+      ..write(obj.totalAmount)
+      ..writeByte(8)
+      ..write(obj.typeIndex);
   }
 
   @override

@@ -49,6 +49,10 @@ class PaymentHistoryProvider extends ChangeNotifier {
       if (payment.invoiceId != null) {
         await loadPayments(payment.invoiceId!);
       }
+      
+      // Real-time backup trigger - DISABLED as per request (store local only)
+      // BackupService.instance.syncPayment(payment);
+      
       return true;
     } catch (e) {
       _error = 'Failed to record payment: $e';

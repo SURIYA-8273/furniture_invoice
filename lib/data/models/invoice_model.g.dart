@@ -21,9 +21,6 @@ class InvoiceModelAdapter extends TypeAdapter<InvoiceModel> {
       invoiceNumber: fields[1] as String,
       customerName: fields[13] as String?,
       items: (fields[2] as List).cast<InvoiceItemModel>(),
-      subtotal: fields[3] as double,
-      discount: fields[4] as double,
-      gst: fields[5] as double,
       grandTotal: fields[6] as double,
       paidAmount: fields[7] as double,
       balanceAmount: fields[8] as double,
@@ -37,7 +34,7 @@ class InvoiceModelAdapter extends TypeAdapter<InvoiceModel> {
   @override
   void write(BinaryWriter writer, InvoiceModel obj) {
     writer
-      ..writeByte(14)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -46,12 +43,6 @@ class InvoiceModelAdapter extends TypeAdapter<InvoiceModel> {
       ..write(obj.customerName)
       ..writeByte(2)
       ..write(obj.items)
-      ..writeByte(3)
-      ..write(obj.subtotal)
-      ..writeByte(4)
-      ..write(obj.discount)
-      ..writeByte(5)
-      ..write(obj.gst)
       ..writeByte(6)
       ..write(obj.grandTotal)
       ..writeByte(7)

@@ -11,7 +11,7 @@ class DarkTheme {
       
       // Color Scheme
       colorScheme: ColorScheme.dark(
-        primary: ThemeTokens.primaryColorLight,
+        primary: ThemeTokens.primaryColor,
         onPrimary: ThemeTokens.darkTextPrimary,
         primaryContainer: ThemeTokens.primaryColorDark,
         onPrimaryContainer: ThemeTokens.darkTextPrimary,
@@ -63,7 +63,7 @@ class DarkTheme {
       // Elevated Button Theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: ThemeTokens.primaryColorLight,
+          backgroundColor: ThemeTokens.primaryColor,
           foregroundColor: ThemeTokens.darkTextPrimary,
           elevation: ThemeTokens.elevationLow,
           padding: EdgeInsets.symmetric(
@@ -85,7 +85,7 @@ class DarkTheme {
       // Text Button Theme
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: ThemeTokens.primaryColorLight,
+          foregroundColor: ThemeTokens.primaryColor,
           padding: EdgeInsets.symmetric(
             horizontal: ThemeTokens.spacingMd,
             vertical: ThemeTokens.spacingSm,
@@ -104,8 +104,8 @@ class DarkTheme {
       // Outlined Button Theme
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: ThemeTokens.primaryColorLight,
-          side: BorderSide(color: ThemeTokens.primaryColorLight, width: 1.5),
+          foregroundColor: ThemeTokens.primaryColor,
+          side: BorderSide(color: ThemeTokens.primaryColor, width: 1.5),
           padding: EdgeInsets.symmetric(
             horizontal: ThemeTokens.spacingLg,
             vertical: ThemeTokens.spacingMd,
@@ -147,7 +147,7 @@ class DarkTheme {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(ThemeTokens.radiusMedium),
           borderSide: BorderSide(
-            color: ThemeTokens.primaryColorLight,
+            color: ThemeTokens.primaryColor,
             width: ThemeTokens.inputFocusedBorderWidth,
           ),
         ),
@@ -179,12 +179,20 @@ class DarkTheme {
       
       // Floating Action Button Theme
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: ThemeTokens.primaryColorLight,
+        backgroundColor: ThemeTokens.primaryColor,
         foregroundColor: ThemeTokens.darkTextPrimary,
         elevation: ThemeTokens.elevationMedium,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(ThemeTokens.radiusLarge),
         ),
+      ),
+
+      // SnackBar Theme
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.grey[800],
+        contentTextStyle: const TextStyle(color: Colors.white),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
       
       // Divider Theme

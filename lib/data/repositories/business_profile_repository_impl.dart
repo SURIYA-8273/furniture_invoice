@@ -9,12 +9,12 @@ import '../models/business_profile_model.dart';
 class BusinessProfileRepositoryImpl implements BusinessProfileRepository {
   static const String _profileKey = 'business_profile';
 
-  Box get _box => Hive.box(HiveBoxNames.businessProfile);
+  Box<BusinessProfileModel> get _box => Hive.box<BusinessProfileModel>(HiveBoxNames.businessProfile);
 
   @override
   Future<BusinessProfileEntity?> getProfile() async {
     try {
-      final model = _box.get(_profileKey) as BusinessProfileModel?;
+      final model = _box.get(_profileKey);
       return model?.toEntity();
     } catch (e) {
       throw Exception('Failed to get business profile: $e');
@@ -34,7 +34,7 @@ class BusinessProfileRepositoryImpl implements BusinessProfileRepository {
   @override
   Future<void> updateLogo(String profileId, String logoPath) async {
     try {
-      final model = _box.get(_profileKey) as BusinessProfileModel?;
+      final model = _box.get(_profileKey);
       if (model == null) {
         throw Exception('Business profile not found');
       }

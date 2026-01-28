@@ -11,23 +11,23 @@ class ThemeTokens {
   // BRAND COLORS
   // ============================================================
   
-  /// Primary brand color - used for main actions and highlights
-  static const Color primaryColor = Colors.blue; // 0xFF2196F3
+  /// Primary brand color - Indigo/Blue
+  static const Color primaryColor = Colors.brown; 
   
   /// Primary color variant for hover/pressed states
-  static const Color primaryColorDark = Color(0xFF1565C0);
+  static const Color primaryColorDark = Color(0xFF4E342E); // Brown 800
   
   /// Primary color light variant
-  static const Color primaryColorLight = Color(0xFF42A5F5);
+  static const Color primaryColorLight = Color(0xFFA1887F); // Brown 300
   
-  /// Secondary brand color - used for accents
-  static const Color secondaryColor = Color(0xFFFF6F00); // Orange
+  /// Secondary brand color - Amber/Gold
+  static const Color secondaryColor = Color(0xFFF59E0B);
   
   /// Secondary color dark variant
-  static const Color secondaryColorDark = Color(0xFFE65100);
+  static const Color secondaryColorDark = Color(0xFFD97706);
   
   /// Secondary color light variant
-  static const Color secondaryColorLight = Color(0xFFFF8F00);
+  static const Color secondaryColorLight = Color(0xFFFBBF24);
 
   // ============================================================
   // SEMANTIC COLORS
@@ -44,6 +44,60 @@ class ThemeTokens {
   
   /// Info color - for informational messages
   static const Color infoColor = Color(0xFF29B6F6); // Light Blue
+
+  // ============================================================
+  // GRADIENT COLORS (for dashboard cards and highlights)
+  // ============================================================
+  
+  /// Billing card gradient - Brown to Amber
+  static const Color gradientBillingStart = Color(0xFF8D6E63); // Brown 400
+  static const Color gradientBillingEnd = Color(0xFF6D4C41); // Brown 600
+  
+  /// Reports card gradient - Brown darker shades
+  static const Color gradientReportsStart = Color(0xFF795548); // Brown 500
+  static const Color gradientReportsEnd = Color(0xFF5D4037); // Brown 700
+  
+  /// Settings card gradient - Amber/Brown
+  static const Color gradientSettingsStart = Color(0xFFBCAAA4); // Brown 200
+  static const Color gradientSettingsEnd = Color(0xFF8D6E63); // Brown 400
+
+  // ============================================================
+  // SUMMARY CARD COLORS (for reports and analytics)
+  // ============================================================
+  
+  /// Total Sales card - Green
+  static const Color summaryCardSales = Color(0xFF10B981);
+  
+  /// Total Pending card - Red
+  static const Color summaryCardPending = Color(0xFFEF4444);
+  
+  /// Total Bills card - Brown
+  static const Color summaryCardBills = Color(0xFF8D6E63);
+  
+  /// Unpaid Bills card - Amber
+  static const Color summaryCardUnpaid = Color(0xFFF59E0B);
+
+  // ============================================================
+  // INVOICE THEME COLORS (Brown Theme)
+  // ============================================================
+  
+  /// Invoice Primary Color - Brown
+  static const Color invoicePrimary = Colors.brown;
+  
+  /// Invoice Header Text Color - White
+  static const Color invoiceHeaderText = Colors.white;
+  
+  /// Invoice Table Header Background
+  static const Color invoiceTableHeader = Colors.brown;
+  
+  /// Invoice Table Border Color
+  static const Color invoiceTableBorder = Color(0xFFBCAAA4); // Brown 200 equivalent
+  
+  /// Invoice Alternating Row Color
+  static const Color invoiceRowAlternate = Color(0xFFFFF3E0); // Orange 50 equivalent
+  
+  /// Invoice Background Color
+  static const Color invoiceBackground = Color(0xFFF5F5F5); // Grey 100 equivalent
 
   // ============================================================
   // LIGHT THEME COLORS
@@ -105,7 +159,27 @@ class ThemeTokens {
   static const Color darkDivider = Color(0xFF3E3E3E);
   
   /// Dark theme border color
-  static const Color darkBorder = Color(0xFF3E3E3E);
+  static const Color darkBorder = Color(0xFF333333);
+
+  // ============================================================
+  // SEMANTIC BACKGROUNDS (Use these for dynamic themes)
+  // ============================================================
+  
+  /// Scaffold background color that adapts to brightness
+  static Color getScaffoldBackground(BuildContext context) => 
+    Theme.of(context).brightness == Brightness.light ? lightBackground : darkBackground;
+
+  /// Surface color for cards and panels that adapts to brightness
+  static Color getSurfaceColor(BuildContext context) => 
+    Theme.of(context).brightness == Brightness.light ? lightSurface : darkSurface;
+    
+  /// Card color that adapts to brightness
+  static Color getCardColor(BuildContext context) => 
+    Theme.of(context).brightness == Brightness.light ? lightCard : darkCard;
+
+  /// Invoice alternating row color that adapts to brightness
+  static Color getInvoiceRowAlternate(BuildContext context) => 
+    Theme.of(context).brightness == Brightness.light ? invoiceRowAlternate : darkSurface;
 
   // ============================================================
   // SPACING TOKENS
@@ -278,4 +352,36 @@ class ThemeTokens {
   
   /// Input field focused border width - 2.0
   static const double inputFocusedBorderWidth = 2.0;
+
+  // ============================================================
+  // ANIMATION DURATIONS
+  // ============================================================
+  
+  /// Fast animation duration - 150ms
+  static const Duration animationFast = Duration(milliseconds: 150);
+  
+  /// Normal animation duration - 300ms
+  static const Duration animationNormal = Duration(milliseconds: 300);
+  
+  /// Slow animation duration - 500ms
+  static const Duration animationSlow = Duration(milliseconds: 500);
+  
+  /// Page transition duration - 250ms
+  static const Duration animationPageTransition = Duration(milliseconds: 250);
+
+  // ============================================================
+  // OPACITY VALUES
+  // ============================================================
+  
+  /// Disabled opacity - 0.38
+  static const double opacityDisabled = 0.38;
+  
+  /// Hover opacity - 0.04
+  static const double opacityHover = 0.04;
+  
+  /// Focus opacity - 0.12
+  static const double opacityFocus = 0.12;
+  
+  /// Selected opacity - 0.08
+  static const double opacitySelected = 0.08;
 }
