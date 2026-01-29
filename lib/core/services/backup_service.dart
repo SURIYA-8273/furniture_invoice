@@ -251,8 +251,8 @@ class BackupService {
         }
         
         // Clear deletions from cloud after processing
-        await _supabase.clearDeletedInvoices();
-        debugPrint('Processed and cleared cloud deletions.');
+        // await _supabase.clearDeletedInvoices();
+        // debugPrint('Processed and cleared cloud deletions.');
       }
 
       // 1. Fetch all bills

@@ -176,23 +176,27 @@ ALTER TABLE backup_logs ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies if they exist
 DROP POLICY IF EXISTS "Allow all for users" ON bills;
+DROP POLICY IF EXISTS "Enable access for all users" ON bills;
 DROP POLICY IF EXISTS "Allow all for users" ON bill_items;
+DROP POLICY IF EXISTS "Enable access for all users" ON bill_items;
 DROP POLICY IF EXISTS "Allow all for users" ON payment_history;
+DROP POLICY IF EXISTS "Enable access for all users" ON payment_history;
 DROP POLICY IF EXISTS "Allow all for users" ON backup_logs;
+DROP POLICY IF EXISTS "Enable access for all users" ON backup_logs;
 
 -- Create policies for everyone (anon and authenticated)
 -- Note: In a production environment with sensitive data, you should restrict this.
 -- For this billing app, we allow access via the anon/service key.
-CREATE POLICY "Allow all for users" ON bills
+CREATE POLICY "Enable access for all users" ON bills
   FOR ALL USING (true) WITH CHECK (true);
 
-CREATE POLICY "Allow all for users" ON bill_items
+CREATE POLICY "Enable access for all users" ON bill_items
   FOR ALL USING (true) WITH CHECK (true);
 
-CREATE POLICY "Allow all for users" ON payment_history
+CREATE POLICY "Enable access for all users" ON payment_history
   FOR ALL USING (true) WITH CHECK (true);
 
-CREATE POLICY "Allow all for users" ON backup_logs
+CREATE POLICY "Enable access for all users" ON backup_logs
   FOR ALL USING (true) WITH CHECK (true);
 
 -- ============================================
@@ -209,7 +213,20 @@ COMMENT ON TABLE backup_logs IS 'Tracks all backup operations for monitoring and
 -- ============================================
 
 CREATE TABLE deleted_invoices (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Fixed: using gen_random_uuid() instead of uuid_generate_v4() which requires extension
     invoice_id TEXT NOT NULL,
     deleted_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- ============================================
+-- 8. DELETED INVOICES RLS
+-- ============================================
+
+ALTER TABLE deleted_invoices ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow all for users" ON deleted_invoices;
+DROP POLICY IF EXISTS "Enable access for all users" ON deleted_invoices;
+
+CREATE POLICY "Enable access for all users" ON deleted_invoices
+  FOR ALL USING (true) WITH CHECK (true);
+

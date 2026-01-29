@@ -29,28 +29,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       if (isConnected) {
         if (mounted) {
           setState(() {
-            _statusMessage = 'Connected! Backing up data...';
-          });
-        }
-        
-        // 1. Run Backup (Export)
-        await BackupService.instance.performFullBackup(
-          backupType: 'automatic',
-          onProgress: (status) {
-             // Optional: showing backup progress
-          },
-        );
-
-        // Allow UI to breathe between heavy operations
-        await Future.delayed(const Duration(milliseconds: 100));
-
-        if (mounted) {
-          setState(() {
-            _statusMessage = 'Downloading updates...';
+            _statusMessage = 'Connected! Restoring data...';
           });
         }
 
-        // 2. Run Restore (Import)
+        // 1. Run Restore (Import)
+        // WARNING: restoring first may overwrite local unsynced changes
         await BackupService.instance.restoreData(
           onProgress: (status) {
             if (mounted) {
@@ -60,6 +44,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             }
           },
         );
+
+        // Allow UI to breathe between heavy operations
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        if (mounted) {
+          setState(() {
+            _statusMessage = 'Backing up data...';
+          });
+        }
+
+        // 2. Run Backup (Export)
+        await BackupService.instance.performFullBackup(
+          backupType: 'automatic',
+          onProgress: (status) {
+            // Optional: showing backup progress
+          },
+        );
+
+
+
+
       } else {
         if (mounted) {
           setState(() {
