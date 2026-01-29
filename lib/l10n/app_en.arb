@@ -278,6 +278,8 @@
   "excelExportSuccess": "Excel Export Successful",
   "excelExportSuccessMessage": "Data exported to Documents/FurnitureBillingData",
   "excelExportFailed": "Excel Export Failed",
+  "excelExportConfirmTitle": "Export to Excel?",
+  "excelExportConfirmMessage": "This will generate an Excel report of all your data in the Documents folder.",
   "backupToCloudConfirmTitle": "Backup to Cloud?",
   "backupToCloudConfirmMessage": "This will backup all your data to the cloud.",
   "exitConfirmationTitle": "Exit?",

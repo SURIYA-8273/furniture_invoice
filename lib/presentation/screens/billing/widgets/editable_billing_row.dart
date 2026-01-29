@@ -82,45 +82,59 @@ class _EditableBillingRowState extends State<EditableBillingRow> {
     if (renderBox == null) return;
 
     _overlayEntry = OverlayEntry(
-      builder: (context) => Positioned(
-        width: 150, // Fixed width for dropdown
-        child: CompositedTransformFollower(
-          link: _layerLink,
-          showWhenUnlinked: false,
-          offset: const Offset(0, 35), // Show below inputs
-          child: Material(
-            elevation: 4,
-            borderRadius: BorderRadius.circular(4),
-            color: Colors.white,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 150),
-              child: ListView.builder(
-                padding: EdgeInsets.zero,
-                shrinkWrap: true,
-                itemCount: uniqueSizes.length,
-                itemBuilder: (context, i) {
-                   final size = uniqueSizes[i];
-                   return InkWell(
-                     onTap: () {
-                        final parts = _parseSize(size);
-                        _widthController.text = parts[0];
-                        _heightController.text = parts[1];
-                        _onSizeChanged();
-                        _widthFocus.unfocus();
-                        _heightFocus.unfocus();
-                        _removeOverlay();
-                     },
-                     child: Padding(
-                       padding: const EdgeInsets.all(8.0),
-                       child: Text(size, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                     ),
-                   );
-                },
+      builder: (context) {
+        final theme = Theme.of(context);
+        final currentSizes = widget.provider.uniqueSizes;
+        
+        if (currentSizes.isEmpty) return const SizedBox.shrink();
+
+        return Positioned(
+          width: 150, // Fixed width for dropdown
+          child: CompositedTransformFollower(
+            link: _layerLink,
+            showWhenUnlinked: false,
+            offset: const Offset(0, 35), // Show below inputs
+            child: Material(
+              elevation: 4,
+              borderRadius: BorderRadius.circular(ThemeTokens.radiusSmall),
+              color: ThemeTokens.getCardColor(context),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 150),
+                child: ListView.builder(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  itemCount: currentSizes.length,
+                  itemBuilder: (context, i) {
+                     final size = currentSizes[i];
+                     return InkWell(
+                       onTap: () {
+                          final parts = _parseSize(size);
+                          _widthController.text = parts[0];
+                          _heightController.text = parts[1];
+                          _onSizeChanged();
+                          _widthFocus.unfocus();
+                          _heightFocus.unfocus();
+                          _removeOverlay();
+                       },
+                       child: Padding(
+                         padding: const EdgeInsets.all(ThemeTokens.spacingSm),
+                         child: Text(
+                           size, 
+                           style: TextStyle(
+                             fontSize: 12, 
+                             fontWeight: FontWeight.bold,
+                             color: theme.textTheme.bodyMedium?.color,
+                           ),
+                         ),
+                       ),
+                     );
+                  },
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
     Overlay.of(context).insert(_overlayEntry!);
   }
@@ -142,57 +156,63 @@ class _EditableBillingRowState extends State<EditableBillingRow> {
     if (renderBox == null) return;
 
     _descOverlayEntry = OverlayEntry(
-      builder: (context) => Positioned(
-        width: 300, // Wider for description
-        child: CompositedTransformFollower(
-          link: _descLayerLink,
-          showWhenUnlinked: false,
-          offset: const Offset(0, 40), 
-          child: Material(
-            elevation: 8,
-            borderRadius: BorderRadius.circular(4),
-            color: Colors.white,
+      builder: (context) {
+        final theme = Theme.of(context);
+        return Positioned(
+          width: 300, // Wider for description
+          child: CompositedTransformFollower(
+            link: _descLayerLink,
+            showWhenUnlinked: false,
+            offset: const Offset(0, 40), 
             child: Consumer<DescriptionProvider>(
               builder: (context, provider, child) {
                 final descriptions = provider.descriptions;
-                if (descriptions.isEmpty) {
-                   return const SizedBox(height: 0); // Hide if empty
-                }
                 
                 // Filter based on text
                 final query = _nameController.text.toLowerCase();
                 final filtered = descriptions.where((d) => d.text.toLowerCase().contains(query)).toList();
                 
-                if (filtered.isEmpty) return const SizedBox(height: 0);
+                if (filtered.isEmpty) return const SizedBox.shrink();
 
-                return ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 200),
-                  child: ListView.builder(
-                    padding: EdgeInsets.zero,
-                    shrinkWrap: true,
-                    itemCount: filtered.length,
-                    itemBuilder: (context, i) {
-                       final desc = filtered[i];
-                       return InkWell(
-                         onTap: () {
-                            _nameController.text = desc.text;
-                            widget.provider.updateItemField(widget.index, productName: desc.text);
-                            _descFocus.unfocus();
-                            _removeDescOverlay();
-                         },
-                         child: Padding(
-                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                           child: Text(desc.text, style: const TextStyle(fontSize: 14)),
-                         ),
-                       );
-                    },
+                return Material(
+                  elevation: 8,
+                  borderRadius: BorderRadius.circular(ThemeTokens.radiusSmall),
+                  color: ThemeTokens.getCardColor(context),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 200),
+                    child: ListView.builder(
+                      padding: EdgeInsets.zero,
+                      shrinkWrap: true,
+                      itemCount: filtered.length,
+                      itemBuilder: (context, i) {
+                         final desc = filtered[i];
+                         return InkWell(
+                           onTap: () {
+                              _nameController.text = desc.text;
+                              widget.provider.updateItemField(widget.index, productName: desc.text);
+                              _descFocus.unfocus();
+                              _removeDescOverlay();
+                           },
+                           child: Padding(
+                             padding: const EdgeInsets.symmetric(horizontal: ThemeTokens.spacingMd, vertical: ThemeTokens.spacingSm),
+                             child: Text(
+                               desc.text, 
+                               style: TextStyle(
+                                 fontSize: 14,
+                                 color: theme.textTheme.bodyMedium?.color,
+                               ),
+                             ),
+                           ),
+                         );
+                      },
+                    ),
                   ),
                 );
-              }
+              },
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
     Overlay.of(context).insert(_descOverlayEntry!);
   }

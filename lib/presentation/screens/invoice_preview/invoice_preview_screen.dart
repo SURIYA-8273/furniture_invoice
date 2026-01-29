@@ -4,6 +4,7 @@ import '../../../core/theme/theme_tokens.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/services/pdf_service.dart';
 import '../../../core/services/whatsapp_service.dart';
+import '../../widgets/custom_dialog.dart';
 import '../../../domain/entities/invoice_entity.dart';
 import '../../providers/business_profile_provider.dart';
 import '../../providers/billing_calculation_provider.dart';
@@ -36,44 +37,42 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
   Future<void> _showWhatsAppDialog() async {
     final l10n = AppLocalizations.of(context)!;
     final phoneNumberController = TextEditingController();
-    
-    // Pre-fill if customer has phone (simple heuristic, can be improved)
-    // if (widget.invoice.customerPhone != null) phoneNumberController.text = widget.invoice.customerPhone!; 
 
-
-
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.shareInvoice),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(l10n.enterWhatsappNumberHint),
-            const SizedBox(height: 16),
-            TextField(
-              controller: phoneNumberController,
-              decoration: InputDecoration(
-                labelText: l10n.whatsappNumberOptional,
-                hintText: l10n.whatsappNumberHintExample,
-                prefixText: '+91 ',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.phone,
+    await CustomDialog.show(
+      context,
+      title: l10n.shareInvoice,
+      icon: Icons.share_rounded,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.enterWhatsappNumberHint,
+            style: TextStyle(
+              color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+              fontSize: 14,
             ),
-          ],
-        ),
-        actions: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context); // Close dialog
-              // If text is empty, passing empty string triggers 'Select Chat' logic in WhatsAppService (updated previously)
-              _generateAndSharePdf(share: true, phoneNumber: phoneNumberController.text.trim());
-            },
-            child: Text(l10n.send),
+          ),
+          const SizedBox(height: ThemeTokens.spacingMd),
+          TextField(
+            controller: phoneNumberController,
+            decoration: InputDecoration(
+              labelText: l10n.whatsappNumberOptional,
+              hintText: l10n.whatsappNumberHintExample,
+              prefixText: '+91 ',
+              border: const OutlineInputBorder(),
+              prefixIcon: const Icon(Icons.phone_android_rounded),
+            ),
+            keyboardType: TextInputType.phone,
           ),
         ],
       ),
+      primaryActionLabel: l10n.send,
+      onPrimaryAction: () {
+        Navigator.pop(context); // Close dialog
+        _generateAndSharePdf(share: true, phoneNumber: phoneNumberController.text.trim());
+      },
+      secondaryActionLabel: l10n.cancel,
     );
   }
 
@@ -85,19 +84,13 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
     
     if (businessProfile == null) {
       if (!context.mounted) return;
-      showDialog(
-        context: context,
-          builder: (context) => AlertDialog(
-            title: Text(l10n.businessProfileMissing),
-            content: Text(l10n.businessProfileSetupMessage),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(l10n.cancel.toUpperCase()),
-              ),
-            ],
-          ),
-        );
+      await CustomDialog.show(
+        context,
+        title: l10n.businessProfileMissing,
+        message: l10n.businessProfileSetupMessage,
+        type: CustomDialogType.error,
+        primaryActionLabel: l10n.ok,
+      );
       return;
     }
     

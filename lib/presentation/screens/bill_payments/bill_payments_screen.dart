@@ -8,6 +8,7 @@ import '../../../core/services/backup_service.dart';
 import 'widgets/bill_list_view.dart';
 import 'widgets/bill_payments_search_bar.dart';
 import 'widgets/bill_payments_tab_bar.dart';
+import '../../widgets/custom_dialog.dart';
 
 class BillPaymentsScreen extends StatefulWidget {
   const BillPaymentsScreen({super.key});
@@ -139,23 +140,13 @@ class _BillPaymentsScreenState extends State<BillPaymentsScreen> with SingleTick
 
 
   Future<void> _showDeleteConfirmationDialog(BuildContext context, InvoiceEntity invoice, AppLocalizations l10n) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.deleteBill),
-        content: Text(l10n.deleteBillConfirmation(invoice.invoiceNumber)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(l10n.delete.toUpperCase()),
-          ),
-        ],
-      ),
+    final confirmed = await CustomDialog.show<bool>(
+      context,
+      type: CustomDialogType.warning,
+      title: l10n.deleteBill,
+      message: l10n.deleteBillConfirmation(invoice.invoiceNumber),
+      primaryActionLabel: l10n.delete,
+      secondaryActionLabel: l10n.cancel,
     );
 
     if (confirmed == true && context.mounted) {
@@ -173,18 +164,13 @@ class _BillPaymentsScreenState extends State<BillPaymentsScreen> with SingleTick
         }
       } catch (e) {
         if (context.mounted) {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text(l10n.connectionStatus),
-              content: Text(_getPrettyErrorMessage(e.toString(), l10n)),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(l10n.ok),
-                ),
-              ],
-            ),
+          CustomDialog.show(
+            context,
+            type: CustomDialogType.error,
+            title: l10n.connectionStatus,
+            message: _getPrettyErrorMessage(e.toString(), l10n),
+            primaryActionLabel: l10n.ok,
+            onPrimaryAction: () => Navigator.pop(context),
           );
         }
       }
@@ -192,22 +178,13 @@ class _BillPaymentsScreenState extends State<BillPaymentsScreen> with SingleTick
   }
 
   Future<void> _confirmExport(BuildContext context, AppLocalizations l10n) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.backupToCloudConfirmTitle),
-        content: Text(l10n.backupToCloudConfirmMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.backupNow),
-          ),
-        ],
-      ),
+    final confirmed = await CustomDialog.show<bool>(
+      context,
+      type: CustomDialogType.info,
+      title: l10n.backupToCloudConfirmTitle,
+      message: l10n.backupToCloudConfirmMessage,
+      primaryActionLabel: l10n.backupNow,
+      secondaryActionLabel: l10n.cancel,
     );
 
     if (confirmed == true && context.mounted) {
@@ -229,18 +206,13 @@ class _BillPaymentsScreenState extends State<BillPaymentsScreen> with SingleTick
             ),
           );
         } else {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text(l10n.backupFailed),
-              content: Text(_getPrettyErrorMessage(result.errorMessage ?? l10n.backupError, l10n)),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(l10n.ok),
-                ),
-              ],
-            ),
+          CustomDialog.show(
+            context,
+            type: CustomDialogType.error,
+            title: l10n.backupFailed,
+            message: _getPrettyErrorMessage(result.errorMessage ?? l10n.backupError, l10n),
+            primaryActionLabel: l10n.ok,
+            onPrimaryAction: () => Navigator.pop(context),
           );
         }
       }
@@ -248,22 +220,13 @@ class _BillPaymentsScreenState extends State<BillPaymentsScreen> with SingleTick
   }
 
   Future<void> _confirmImport(BuildContext context, AppLocalizations l10n) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.importFromCloudConfirmTitle),
-        content: Text(l10n.importFromCloudConfirmMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.importNow),
-          ),
-        ],
-      ),
+    final confirmed = await CustomDialog.show<bool>(
+      context,
+      type: CustomDialogType.info,
+      title: l10n.importFromCloudConfirmTitle,
+      message: l10n.importFromCloudConfirmMessage,
+      primaryActionLabel: l10n.importNow,
+      secondaryActionLabel: l10n.cancel,
     );
 
     if (confirmed == true && context.mounted) {
@@ -287,18 +250,13 @@ class _BillPaymentsScreenState extends State<BillPaymentsScreen> with SingleTick
           // Refresh list
           context.read<InvoiceProvider>().loadInvoices();
         } else {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text(l10n.importFailed),
-              content: Text(_getPrettyErrorMessage(result.errorMessage ?? l10n.importError, l10n)),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(l10n.ok),
-                ),
-              ],
-            ),
+          CustomDialog.show(
+            context,
+            type: CustomDialogType.error,
+            title: l10n.importFailed,
+            message: _getPrettyErrorMessage(result.errorMessage ?? l10n.importError, l10n),
+            primaryActionLabel: l10n.ok,
+            onPrimaryAction: () => Navigator.pop(context),
           );
         }
       }

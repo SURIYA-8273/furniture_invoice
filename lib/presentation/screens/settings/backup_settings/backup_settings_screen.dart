@@ -16,6 +16,7 @@ import 'widgets/manual_export_card.dart';
 import 'widgets/backup_info_card.dart';
 import 'widgets/restore_info_card.dart';
 import 'widgets/excel_sync_status_card.dart';
+import '../../../widgets/custom_dialog.dart';
 
 class BackupSettingsScreen extends StatefulWidget {
   const BackupSettingsScreen({super.key});
@@ -167,45 +168,20 @@ class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
 
     if (supabaseUrl == null || supabaseKey == null) return;
 
-    // simple dialog to pick value 1-30
-    // user can change the days
-    int? selectedDays = await showDialog<int>(
-      context: context,
-      builder: (context) {
-        int tempDays = _excelSyncFrequencyDays;
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text(l10n.syncFrequency),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                   Text(l10n.everyDays("$tempDays")),
-                   Slider(
-                     min: 1,
-                     max: 30,
-                     divisions: 29,
-                     value: tempDays.toDouble(),
-                     onChanged: (val) {
-                       setState(() => tempDays = val.toInt());
-                     },
-                   ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(l10n.cancel),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.pop(context, tempDays),
-                  child: Text(l10n.save),
-                ),
-              ],
-            );
-          }
-        );
-      },
+    // Use CustomDialog with a slider content
+    int currentTempDays = _excelSyncFrequencyDays;
+    final selectedDays = await CustomDialog.show<int>(
+      context,
+      title: l10n.syncFrequency,
+      content: _FrequencySlider(
+        initialValue: _excelSyncFrequencyDays,
+        onChanged: (val) {
+          currentTempDays = val;
+        },
+      ),
+      primaryActionLabel: l10n.save,
+      onPrimaryAction: () => Navigator.pop(context, currentTempDays),
+      secondaryActionLabel: l10n.cancel,
     );
 
     if (selectedDays != null && selectedDays != _excelSyncFrequencyDays) {
@@ -418,60 +394,39 @@ class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
 
   void _showSuccessDialog(BackupResult result) {
     final l10n = AppLocalizations.of(context)!;
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.green, size: 28),
-            const SizedBox(width: 12),
-            Text(l10n.backupSuccessful),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l10n.dataBackedUpSuccessfully),
-            const SizedBox(height: 16),
-            _buildStatRow(l10n.billsSynced, '${result.billsSynced}'),
-            if (result.billsFailed > 0)
-              _buildStatRow(l10n.billsFailed, '${result.billsFailed}', isError: true),
-            _buildStatRow(l10n.paymentsSynced, '${result.paymentsSynced}'),
-            if (result.paymentsFailed > 0)
-              _buildStatRow(l10n.paymentsFailed, '${result.paymentsFailed}', isError: true),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.ok),
+    CustomDialog.show(
+      context,
+      type: CustomDialogType.success,
+      title: l10n.backupSuccessful,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.dataBackedUpSuccessfully,
+            textAlign: TextAlign.center,
           ),
+          const SizedBox(height: 16),
+          _buildStatRow(l10n.billsSynced, '${result.billsSynced}'),
+          if (result.billsFailed > 0)
+            _buildStatRow(l10n.billsFailed, '${result.billsFailed}', isError: true),
+          _buildStatRow(l10n.paymentsSynced, '${result.paymentsSynced}'),
+          if (result.paymentsFailed > 0)
+            _buildStatRow(l10n.paymentsFailed, '${result.paymentsFailed}', isError: true),
         ],
       ),
+      primaryActionLabel: l10n.ok,
     );
   }
 
   void _showErrorDialog(String title, String message) {
     final l10n = AppLocalizations.of(context)!;
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.error, color: Colors.red, size: 28),
-            const SizedBox(width: 12),
-            Text(title),
-          ],
-        ),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.ok),
-          ),
-        ],
-      ),
+    CustomDialog.show(
+      context,
+      type: CustomDialogType.error,
+      title: title,
+      message: message,
+      primaryActionLabel: l10n.ok,
     );
   }
 
@@ -482,30 +437,6 @@ class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
         l10n.businessProfileSetupMessage); // Using existing descriptive string
       return;
     }
-
-    // Confirm before overwriting local data
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.importFromCloudConfirmTitle),
-        content: Text(l10n.importFromCloudConfirmMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              HapticFeedback.mediumImpact();
-              Navigator.pop(context, true);
-            },
-            child: Text(l10n.importNow),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true) return;
 
     setState(() {
       _isRestoring = true;
@@ -551,33 +482,24 @@ class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
 
   void _showRestoreSuccessDialog(RestoreResult result) {
     final l10n = AppLocalizations.of(context)!;
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.green, size: 28),
-            const SizedBox(width: 12),
-            Text(l10n.importSuccessful),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l10n.dataImportedSuccessfully),
-            const SizedBox(height: 16),
-            _buildStatRow(l10n.billsRestored, '${result.billsRestored}'),
-            _buildStatRow(l10n.paymentsRestored, '${result.paymentsRestored}'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.ok),
+    CustomDialog.show(
+      context,
+      type: CustomDialogType.success,
+      title: l10n.importSuccessful,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.dataImportedSuccessfully,
+            textAlign: TextAlign.center,
           ),
+          const SizedBox(height: 16),
+          _buildStatRow(l10n.billsRestored, '${result.billsRestored}'),
+          _buildStatRow(l10n.paymentsRestored, '${result.paymentsRestored}'),
         ],
       ),
+      primaryActionLabel: l10n.ok,
     );
   }
 
@@ -755,18 +677,18 @@ class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
                 // Manual Backup Button
                 SizedBox(
                   width: double.infinity,
-                  child: OutlinedButton.icon(
+                  child: ElevatedButton.icon(
                     onPressed: _isConnected && !_isBackingUp && !_isRestoring 
                       ? () {
                           HapticFeedback.selectionClick();
-                          _performManualBackup();
+                          _confirmBackup();
                         }
                       : null,
                     icon: _isBackingUp 
                       ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
                       : const Icon(Icons.backup),
                     label: Text(_isBackingUp ? l10n.loading : l10n.backupNow),
-                    style: OutlinedButton.styleFrom(
+                    style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.symmetric(
                         vertical: ThemeTokens.spacingMd,
                       ),
@@ -836,7 +758,7 @@ class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
                 // Manual Restore Button
                 SizedBox(
                   width: double.infinity,
-                  child: OutlinedButton.icon(
+                  child: ElevatedButton.icon(
                     onPressed: _isConnected && !_isRestoring && !_isBackingUp 
                       ? () {
                           HapticFeedback.selectionClick();
@@ -847,7 +769,7 @@ class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
                       ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
                       : const Icon(Icons.restore),
                     label: Text(_isRestoring ? l10n.loading : l10n.importNow),
-                    style: OutlinedButton.styleFrom(
+                    style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.symmetric(
                         vertical: ThemeTokens.spacingMd,
                       ),
@@ -877,7 +799,7 @@ class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
           isConnected: _isConnected,
           isSyncing: _isExcelSyncing,
           canExprot: _isConnected && !_isExcelSyncing && !_isBackingUp && !_isRestoring,
-          onExport: _performManualExcelSync,
+          onExport: _confirmExcelExport,
         ),
 
         SizedBox(height: ThemeTokens.spacingSm),
@@ -911,25 +833,99 @@ class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
   }
   void _confirmImport() {
     final l10n = AppLocalizations.of(context)!;
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.importFromCloudConfirmTitle),
-        content: Text(l10n.importFromCloudConfirmMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _performManualImport();
-            },
-            child: Text(l10n.importNow),
-          ),
-        ],
-      ),
+    CustomDialog.show(
+      context,
+      type: CustomDialogType.warning,
+      title: l10n.importFromCloudConfirmTitle,
+      message: l10n.importFromCloudConfirmMessage,
+      primaryActionLabel: l10n.importNow,
+      secondaryActionLabel: l10n.cancel,
+      onPrimaryAction: () {
+        Navigator.pop(context);
+        _performManualImport();
+      },
+      onSecondaryAction: () => Navigator.pop(context),
+    );
+  }
+
+  void _confirmBackup() {
+    final l10n = AppLocalizations.of(context)!;
+    CustomDialog.show(
+      context,
+      type: CustomDialogType.warning,
+      title: l10n.backupToCloudConfirmTitle,
+      message: l10n.backupToCloudConfirmMessage,
+      primaryActionLabel: l10n.backupNow,
+      secondaryActionLabel: l10n.cancel,
+      onPrimaryAction: () {
+        Navigator.pop(context);
+        _performManualBackup();
+      },
+      onSecondaryAction: () => Navigator.pop(context),
+    );
+  }
+
+  void _confirmExcelExport() {
+    final l10n = AppLocalizations.of(context)!;
+    CustomDialog.show(
+      context,
+      type: CustomDialogType.info,
+      title: l10n.excelExportConfirmTitle,
+      message: l10n.excelExportConfirmMessage,
+      primaryActionLabel: l10n.exportNow,
+      secondaryActionLabel: l10n.cancel,
+      onPrimaryAction: () {
+        Navigator.pop(context);
+        _performManualExcelSync();
+      },
+      onSecondaryAction: () => Navigator.pop(context),
+    );
+  }
+}
+
+class _FrequencySlider extends StatefulWidget {
+  final int initialValue;
+  final ValueChanged<int> onChanged;
+
+  const _FrequencySlider({
+    required this.initialValue,
+    required this.onChanged,
+  });
+
+  @override
+  State<_FrequencySlider> createState() => _FrequencySliderState();
+}
+
+class _FrequencySliderState extends State<_FrequencySlider> {
+  late int _currentValue;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentValue = widget.initialValue;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          l10n.everyDays("$_currentValue"),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        Slider(
+          min: 1,
+          max: 30,
+          divisions: 29,
+          value: _currentValue.toDouble(),
+          onChanged: (val) {
+            setState(() => _currentValue = val.toInt());
+            widget.onChanged(_currentValue);
+          },
+        ),
+      ],
     );
   }
 }

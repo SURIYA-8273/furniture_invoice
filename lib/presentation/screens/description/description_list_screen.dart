@@ -5,6 +5,7 @@ import '../../providers/description_provider.dart';
 import '../../../domain/entities/description_entity.dart';
 import 'widgets/description_search_bar.dart';
 import 'widgets/description_list_item.dart';
+import '../../widgets/custom_dialog.dart';
 
 class DescriptionListScreen extends StatefulWidget {
   const DescriptionListScreen({super.key});
@@ -23,69 +24,53 @@ class _DescriptionListScreenState extends State<DescriptionListScreen> {
     _textController.text = description?.text ?? '';
     final isEditing = description != null;
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(isEditing ? l10n.editDescription : l10n.addDescription),
-        content: TextField(
-          controller: _textController,
-          decoration: InputDecoration(
-            hintText: l10n.enterDescriptionText,
-            border: const OutlineInputBorder(),
-          ),
-          autofocus: true,
-          textCapitalization: TextCapitalization.sentences,
+    CustomDialog.show(
+      context,
+      title: isEditing ? l10n.editDescription : l10n.addDescription,
+      content: TextField(
+        controller: _textController,
+        decoration: InputDecoration(
+          hintText: l10n.enterDescriptionText,
+          border: const OutlineInputBorder(),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('CANCEL'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final text = _textController.text.trim();
-              if (text.isNotEmpty) {
-                final provider = context.read<DescriptionProvider>();
-                if (isEditing) {
-                  provider.updateDescription(DescriptionEntity(
-                    id: description.id,
-                    text: text,
-                  ));
-                } else {
-                  provider.addDescription(text);
-                }
-                Navigator.pop(context);
-              }
-            },
-            child: Text(l10n.save.toUpperCase()),
-          ),
-        ],
+        autofocus: true,
+        textCapitalization: TextCapitalization.sentences,
       ),
+      primaryActionLabel: l10n.save,
+      secondaryActionLabel: l10n.cancel,
+      onPrimaryAction: () {
+        final text = _textController.text.trim();
+        if (text.isNotEmpty) {
+          final provider = context.read<DescriptionProvider>();
+          if (isEditing) {
+            provider.updateDescription(DescriptionEntity(
+              id: description.id,
+              text: text,
+            ));
+          } else {
+            provider.addDescription(text);
+          }
+          Navigator.pop(context);
+        }
+      },
+      onSecondaryAction: () => Navigator.pop(context),
     );
   }
 
   void _confirmDelete(DescriptionEntity description) {
     final l10n = AppLocalizations.of(context)!;
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.deleteDescription),
-        content: Text(l10n.deleteDescriptionConfirmation(description.text)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('CANCEL'),
-          ),
-          TextButton(
-            onPressed: () {
-              context.read<DescriptionProvider>().deleteDescription(description.id);
-              Navigator.pop(context);
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(l10n.delete.toUpperCase()),
-          ),
-        ],
-      ),
+    CustomDialog.show(
+      context,
+      type: CustomDialogType.warning,
+      title: l10n.deleteDescription,
+      message: l10n.deleteDescriptionConfirmation(description.text),
+      primaryActionLabel: l10n.delete,
+      secondaryActionLabel: l10n.cancel,
+      onPrimaryAction: () {
+        context.read<DescriptionProvider>().deleteDescription(description.id);
+        Navigator.pop(context);
+      },
+      onSecondaryAction: () => Navigator.pop(context),
     );
   }
 

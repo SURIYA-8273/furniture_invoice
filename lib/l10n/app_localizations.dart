@@ -1550,6 +1550,18 @@ abstract class AppLocalizations {
   /// **'Excel Export Failed'**
   String get excelExportFailed;
 
+  /// No description provided for @excelExportConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export to Excel?'**
+  String get excelExportConfirmTitle;
+
+  /// No description provided for @excelExportConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will generate an Excel report of all your data in the Documents folder.'**
+  String get excelExportConfirmMessage;
+
   /// No description provided for @backupToCloudConfirmTitle.
   ///
   /// In en, this message translates to:

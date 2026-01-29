@@ -766,6 +766,13 @@ class AppLocalizationsTa extends AppLocalizations {
   String get excelExportFailed => 'எக்செல் ஏற்றுமதி தோல்வி';
 
   @override
+  String get excelExportConfirmTitle => 'எக்செல்-ற்கு ஏற்றுமதி செய்யவா?';
+
+  @override
+  String get excelExportConfirmMessage =>
+      'இது உங்கள் அனைத்து தரவையும் Documents கோப்புறையில் எக்செல் அறிக்கையாக உருவாக்கும்.';
+
+  @override
   String get backupToCloudConfirmTitle =>
       'மேகக்கணியில் காப்புப்பிரதி எடுக்கவா?';
 
@@ -1116,7 +1123,7 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get enterWhatsappNumberHint =>
-      'Enter WhatsApp number to send directly, or leave empty to select a chat.';
+      'நேரடியாக அனுப்ப வாட்ஸ்அப் எண்ணை உள்ளிடவும், அல்லது அரட்டையைத் தேர்ந்தெடுக்க காலியாக விடவும்.';
 
   @override
   String get nameLabel => 'பெயர்';

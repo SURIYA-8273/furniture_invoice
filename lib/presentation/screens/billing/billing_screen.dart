@@ -9,6 +9,7 @@ import '../billing_success/bill_success_screen.dart';
 import 'widgets/billing_items_list.dart';
 import 'widgets/billing_payment_footer.dart';
 import 'widgets/billing_table_header.dart'; 
+import '../../widgets/custom_dialog.dart';
 
 /// Enhanced Billing Screen: Single page invoice creation with payment details.
 class BillingScreen extends StatefulWidget {
@@ -80,23 +81,13 @@ class _BillingScreenState extends State<BillingScreen> {
 
   Future<void> _showClearConfirmationDialog(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.clearAllDataQuestion),
-        content: Text(l10n.clearAllDataWarning),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.cancel.toUpperCase()),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(l10n.clearAllAction.toUpperCase()),
-          ),
-        ],
-      ),
+    final confirmed = await CustomDialog.show<bool>(
+      context,
+      type: CustomDialogType.warning,
+      title: l10n.clearAllDataQuestion,
+      message: l10n.clearAllDataWarning,
+      primaryActionLabel: l10n.clearAllAction,
+      secondaryActionLabel: l10n.cancel,
     );
 
     if (confirmed == true && context.mounted) {

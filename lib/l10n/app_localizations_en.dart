@@ -763,6 +763,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get excelExportFailed => 'Excel Export Failed';
 
   @override
+  String get excelExportConfirmTitle => 'Export to Excel?';
+
+  @override
+  String get excelExportConfirmMessage =>
+      'This will generate an Excel report of all your data in the Documents folder.';
+
+  @override
   String get backupToCloudConfirmTitle => 'Backup to Cloud?';
 
   @override

@@ -356,6 +356,7 @@
   "totalShort": "மொத்தம்",
   "balanceDueUpper": "மீதமுள்ள நிலுவை",
   "thankYouMessage": "தங்கள் வருகைக்கு மிக்க நன்றி!",
+  "enterWhatsappNumberHint": "நேரடியாக அனுப்ப வாட்ஸ்அப் எண்ணை உள்ளிடவும், அல்லது அரட்டையைத் தேர்ந்தெடுக்க காலியாக விடவும்.",
   "billNumberPrefix": "பில் #",
   "totalAmountCaps": "மொத்த தொகை",
   "initialPaymentNote": "பில் {number} -க்கான ஆரம்ப கட்டணம்",
@@ -411,5 +412,7 @@
   "noExportHistory": "ஏற்றுமதி வரலாறு இல்லை",
   "excelExportSuccess": "எக்செல் ஏற்றுமதி வெற்றி",
   "excelExportSuccessMessage": "Documents/FurnitureBillingData இல் தரவு ஏற்றுமதி செய்யப்பட்டது",
-  "excelExportFailed": "எக்செல் ஏற்றுமதி தோல்வி"
+  "excelExportFailed": "எக்செல் ஏற்றுமதி தோல்வி",
+  "excelExportConfirmTitle": "எக்செல்-ற்கு ஏற்றுமதி செய்யவா?",
+  "excelExportConfirmMessage": "இது உங்கள் அனைத்து தரவையும் Documents கோப்புறையில் எக்செல் அறிக்கையாக உருவாக்கும்."
 }

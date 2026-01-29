@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/theme_tokens.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -12,6 +13,7 @@ import '../../widgets/invoice_items_table.dart';
 import 'widgets/edit_payment_summary_card.dart';
 import 'widgets/payment_history_list.dart';
 import 'widgets/payment_update_button.dart';
+import '../../widgets/custom_dialog.dart';
 
 class EditBillPaymentScreen extends StatefulWidget {
   final InvoiceEntity invoice;
@@ -156,63 +158,88 @@ class _EditBillPaymentScreenState extends State<EditBillPaymentScreen> {
   }
 
   void _showPaymentDialog(BuildContext context, AppLocalizations l10n) {
-    _paymentController.clear(); // Clear previous value
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        String? errorText;
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text(l10n.enterPaymentAmount, style: const TextStyle(fontWeight: FontWeight.bold)),
-              content: TextField(
-                controller: _paymentController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                autofocus: true,
-                decoration: InputDecoration(
-                  prefixText: '₹ ',
-                  hintText: '0.00',
-                  errorText: errorText, // Show error here
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                  filled: true,
-                  fillColor: Theme.of(context).brightness == Brightness.dark 
-                      ? Colors.grey[800] 
-                      : Colors.grey[50],
-                ),
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                onChanged: (_) {
-                  if (errorText != null) {
-                    setState(() => errorText = null);
-                  }
-                },
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: Text(l10n.cancel.toUpperCase(), style: const TextStyle(color: Colors.grey)),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    final val = double.tryParse(_paymentController.text) ?? 0.0;
-                    if (val > _currentInvoice.balanceAmount) {
-                      setState(() {
-                         errorText = l10n.maxPaymentError(_currentInvoice.balanceAmount.toStringAsFixed(2));
-                      });
-                      return;
-                    }
-                    Navigator.pop(ctx);
-                     _handleSave();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ThemeTokens.primaryColor,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                  child: Text(l10n.save.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-                ),
-              ],
-            );
-          }
-        );
+    _paymentController.clear();
+    final formKey = GlobalKey<_PaymentInputFormState>();
+
+    CustomDialog.show(
+      context,
+      title: l10n.enterPaymentAmount,
+      content: _PaymentInputForm(
+        key: formKey,
+        controller: _paymentController,
+        balanceAmount: _currentInvoice.balanceAmount,
+      ),
+      primaryActionLabel: l10n.save,
+      secondaryActionLabel: l10n.cancel,
+      onPrimaryAction: () {
+        if (formKey.currentState?.validate() ?? false) {
+          Navigator.pop(context);
+          _handleSave();
+        }
+      },
+      onSecondaryAction: () => Navigator.pop(context),
+    );
+  }
+}
+
+class _PaymentInputForm extends StatefulWidget {
+  final TextEditingController controller;
+  final double balanceAmount;
+
+  const _PaymentInputForm({
+    super.key,
+    required this.controller,
+    required this.balanceAmount,
+  });
+
+  @override
+  State<_PaymentInputForm> createState() => _PaymentInputFormState();
+}
+
+class _PaymentInputFormState extends State<_PaymentInputForm> {
+  String? _errorText;
+
+  bool validate() {
+    final l10n = AppLocalizations.of(context)!;
+    final val = double.tryParse(widget.controller.text) ?? 0.0;
+    
+    if (val > widget.balanceAmount) {
+      setState(() {
+        _errorText = l10n.maxPaymentError(widget.balanceAmount.toStringAsFixed(2));
+      });
+      return false;
+    }
+    
+    setState(() {
+      _errorText = null;
+    });
+    return true;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: widget.controller,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+      ],
+      autofocus: true,
+      decoration: InputDecoration(
+        prefixText: '₹ ',
+        hintText: '0.00',
+        errorText: _errorText,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(ThemeTokens.radiusSmall)),
+        filled: true,
+        fillColor: Theme.of(context).brightness == Brightness.dark 
+            ? Colors.grey[800] 
+            : Colors.grey[50],
+      ),
+      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+      onChanged: (_) {
+        if (_errorText != null) {
+          setState(() => _errorText = null);
+        }
       },
     );
   }
