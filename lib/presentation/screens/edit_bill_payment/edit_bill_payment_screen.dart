@@ -131,11 +131,18 @@ class _EditBillPaymentScreenState extends State<EditBillPaymentScreen> {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
-            child: InvoiceItemsTable(items: _currentInvoice.items),
+          Flexible(
+            flex: 4,
+            fit: FlexFit.loose,
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+                child: InvoiceItemsTable(items: _currentInvoice.items),
+              ),
+            ),
           ),
           Expanded(
+            flex: 6,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
               child: Column(
